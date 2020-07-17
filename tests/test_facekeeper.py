@@ -24,3 +24,4 @@ def test_initialization():
     recognizer.get_id.assert_called_once()
     storage.get_embeddings.assert_called_once_with(recognizer_id)
     recognizer.add_embeddings.assert_called_once_with(embeddings)
+    assert facekeeper.is_initialized()
