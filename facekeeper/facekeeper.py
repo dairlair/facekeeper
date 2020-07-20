@@ -47,7 +47,7 @@ class StorageInterface(ABC):
         :param recognizer: The unique identifier of neural network and trained model used to embedding calculation
         :param embedding: Face embedding (e.g.: 128-dimensional vector)
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def get_embeddings(self, recognizer: str) -> List[PersonEmbedding]:
@@ -55,7 +55,7 @@ class StorageInterface(ABC):
         This method must retrieves from the storage all embeddings made with specified recognizer
         :param recognizer: The unique identifier of neural network and trained model used to embedding calculation
         """
-        pass
+        raise NotImplementedError
 
 
 class RecognizerInterface(ABC):
@@ -70,14 +70,14 @@ class RecognizerInterface(ABC):
         used inside must returns the new ID as well, cause we can not compare face embeddings received calculated
         with parameters.
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def calc_embedding(self, image: bytes) -> np.array:
         """
         Must returns face embedding calculated with certain trained model.
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def add_embeddings(self, embeddings: List[PersonEmbedding]) -> None:
@@ -85,7 +85,7 @@ class RecognizerInterface(ABC):
         Must adds embeddings to the internal storage of recognizer.
         They will be used for face recognition.
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def recognize(self, image: bytes) -> str:
@@ -93,7 +93,7 @@ class RecognizerInterface(ABC):
         Must calculate face embeddings and try to find similar embedding among the known person embeddings
         to identify the person from the image.
         """
-        pass
+        raise NotImplementedError
 
 
 def get_digest(data: bytes) -> str:

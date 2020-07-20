@@ -2,7 +2,8 @@ from mock import Mock, create_autospec
 from typing import List
 import numpy as np
 
-from facekeeper.facekeeper import FaceKeeper, RecognizerInterface, StorageInterface, PersonEmbedding, get_digest
+from facekeeper.facekeeper import FaceKeeper, RecognizerInterface, StorageInterface, PersonEmbedding, get_digest, \
+    RecognizeResponse
 
 
 def test_initialization():
@@ -27,11 +28,13 @@ def test_initialization():
     assert facekeeper.is_initialized()
 
 
-# Ensure that when we call memorize method the FaceKeeper will:
-#   1. calculate embeddings for given image
-#   2. store the embeddings in the Storage and
-#   3. add them into to the currently running Recognizer
 def test_memorize():
+    """
+    Ensure that when we call memorize method the FaceKeeper will:
+      1. calculate embeddings for given image
+      2. store the embeddings in the Storage and
+      3. add them into to the currently running Recognizer
+    """
     # Given
     recognizer_id: str = 'Any Recognizer ID'
     person: str = 'John Smith'
@@ -55,3 +58,20 @@ def test_memorize():
     recognizer.calc_embedding.assert_called_once_with(image)
     recognizer.add_embeddings.assert_called_once()
     storage.save_embedding.assert_called_once_with(person, digest, recognizer_id, embedding)
+
+
+def test_recognize():
+    # Given
+    person: str = 'John Smith'
+    image: bytes = bytes([0x13, 0x00, 0x00, 0x00, 0x08, 0x00])
+    recognizer = create_autospec(RecognizerInterface)
+    recognizer.recognize = Mock(return_value=person)
+    storage = create_autospec(StorageInterface)
+    facekeeper = FaceKeeper(recognizer, storage)
+
+    # When
+    response = facekeeper.recognize(image)
+
+    # Then
+    assert type(response) is RecognizeResponse
+    assert response.person is person
