@@ -5,7 +5,7 @@ python memorize.py \
     [<Images directory path, default: 'images'>] \
     [<FaceKeeper API URL, default: 'http://127.0.0.1/memorize>']
 
-This script allows to bulk load images to the Super Recognizer database from directories structure:
+This script allows to bulk recognize persons on images from directories structure:
 <source directory: default current work directory>
 |-- <person 1>
 |   |-- <filename 1>.jpg
