@@ -76,6 +76,7 @@ class RecognizerInterface(ABC):
     def calc_embedding(self, image: bytes) -> np.array:
         """
         Must returns face embedding calculated with certain trained model.
+        Must raise FaceNotFoundError when the given image does not contains exactly one face.
         """
         raise NotImplementedError
 
@@ -88,10 +89,12 @@ class RecognizerInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def recognize(self, image: bytes) -> str:
+    def recognize(self, image: bytes) -> Optional[str]:
         """
         Must calculate face embeddings and try to find similar embedding among the known person embeddings
         to identify the person from the image.
+
+        Returns person identifier if the person is found, otherwise returns None.
         """
         raise NotImplementedError
 

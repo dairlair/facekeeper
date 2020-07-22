@@ -1,6 +1,7 @@
 from facekeeper import StorageInterface, PersonEmbedding
 import numpy as np
 from pymongo import MongoClient
+from pymongo.errors import DuplicateKeyError
 from typing import List
 
 
@@ -20,12 +21,15 @@ class MongoDBStorage(StorageInterface):
             'embedding': embedding.tolist(),
         }
         embeddings = self.get_embeddings_collection()
-        embeddings.insert_one(document)
+        try:
+            embeddings.insert_one(document)
+        except DuplicateKeyError:
+            pass
 
     def get_embeddings(self, recognizer) -> List[PersonEmbedding]:
         result = []
         embeddings = self.get_embeddings_collection()
-        for embedding in embeddings.find({recognizer: recognizer}):
+        for embedding in embeddings.find({'recognizer': recognizer}):
             result.append(PersonEmbedding(embedding['person'], embedding['embedding']))
         return result
 

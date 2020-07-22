@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from facekeeper import RecognizerInterface, PersonEmbedding, FaceNotFoundError
 import face_recognition
@@ -29,18 +29,17 @@ class Recognizer(RecognizerInterface):
             self.known_persons.append(embedding.person)
             self.known_face_embeddings.append(embedding.embedding)
 
-    def recognize(self, image: bytes) -> str:
+    def recognize(self, image: bytes) -> Optional[str]:
         face_embedding = self.calc_embedding(image)
         # See if the face is a match for the known face(s)
         matches = face_recognition.compare_faces(self.known_face_embeddings, face_embedding)
 
-        person = ''
-        # If a match was found in known_face_embeddings, just use the first one.
-        if True in matches:
-            first_match_index = matches.index(True)
-            person = self.known_persons[first_match_index]
+        if not (True in matches):
+            return None
 
-        return person
+        # The match was found in known_face_embeddings, just use the first one.
+        first_match_index = matches.index(True)
+        return self.known_persons[first_match_index]
 
 
 def read_file_to_array(image_data: bytes, mode='RGB') -> np.array:
