@@ -1,3 +1,12 @@
-numpy~=1.19.0
-injector~=0.18.3
-mock~=4.0.2
+numpy==1.19.0
+injector==0.18.3
+mock==4.0.2
+Flask==1.1.2
+flask-injector==0.12.3
+waitress~=1.4.4
+connexion==2.7.0
+pymongo==3.10.1
+face-recognition==1.3.0
+swagger-ui-bundle==0.0.6
+requests==2.24.0
+Pillow==7.2.0

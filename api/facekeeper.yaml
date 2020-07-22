@@ -1,0 +1,91 @@
+openapi: 3.0.0
+info:
+  description: Provides ability to memorize and recognize faces from the media files
+  version: "1.0.0"
+  title: FaceKeeper API
+paths:
+  /healthz:
+    get:
+      operationId: app.healthz
+      responses:
+        200:
+          description: The service is running
+  /readyz:
+    get:
+      operationId: app.readyz
+      responses:
+        200:
+          description: The service is ready to handle requests
+  /memorize:
+    post:
+      summary: Save face embedding from media linked to the specified person
+      operationId: app.memorize
+      description: Memorize face and person
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PersonImages'
+      responses:
+        200:
+          description: Face embeddings linked to the specified person
+        400:
+          description: Invalid input, object invalid
+        409:
+          description: An existing item already exists
+  /recognize:
+    post:
+      summary: Trying to recognize person on photo across all memorized persons
+      operationId: app.recognize
+      description: Recognize person
+      responses:
+        200:
+          description: Person identified or not
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Person'
+                  - $ref: '#/components/schemas/Error'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Image'
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+    Person:
+      type: object
+      required:
+        - person
+      properties:
+        person:
+          type: string # An unique person identifier
+    Image:
+      type: object
+      required:
+        - file
+      properties:
+        file:
+          type: string
+          format: binary
+    PersonImages:
+      type: object
+      required:
+        - person
+        - files
+      properties:
+        person:
+          type: string
+        files:
+          type: array
+          items:
+            type: string
+            format: binary
