@@ -7,7 +7,6 @@ from http import HTTPStatus
 from waitress import serve
 from config import Config
 import connexion
-
 import threading
 
 
