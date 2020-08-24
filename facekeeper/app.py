@@ -59,7 +59,6 @@ def recognize(srv: FaceKeeper):
         'error': 'PERSON_NOT_RECOGNIZED',
     }
 
-
 def dapr_recognize(srv: FaceKeeper, dapr: Dapr):
     payload = json.loads(request.data)
 
@@ -72,8 +71,12 @@ def dapr_recognize(srv: FaceKeeper, dapr: Dapr):
         print('Wrong event received: ' + str(request.data), flush=True)
         return {'success': True}
 
+    if len(urls) == 0:
+        print('Empty images set received', flush=True)
+        return {'success': True}
+
     result = {}
-    for url in payload['data']['images']:
+    for url in urls:
         response = requests.get(url)
         recognition = srv.recognize(response.content)
         if recognition:
@@ -89,6 +92,8 @@ def dapr_recognize(srv: FaceKeeper, dapr: Dapr):
             print('Recognized message pubslihed successfully', flush=True)
         else:
             print('Results not published', flush=True)
+    else:
+        print('No persons recognized')
 
     return {'success': True}
 
