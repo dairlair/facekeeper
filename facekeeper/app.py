@@ -78,11 +78,14 @@ def dapr_recognize(srv: FaceKeeper, dapr: Dapr):
     result = {}
     for url in urls:
         response = requests.get(url)
-        recognition = srv.recognize(response.content)
-        if recognition:
-            result[url] = {
-                'person': recognition.person
-            }
+        try:
+            recognition = srv.recognize(response.content)
+            if recognition:
+                result[url] = {
+                    'person': recognition.person
+                }
+        except FaceNotFoundError:
+            pass
 
     if result:
         payload['data']['recognition'] = result
