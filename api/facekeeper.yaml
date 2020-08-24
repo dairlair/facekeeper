@@ -52,6 +52,18 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/Image'
+  /dapr/subscribe:
+    get:
+      summary: Returns the list of topic for Dapr pubsub
+      operationId: app.dapr_subscribe
+      description: Get dapr subscriptions list
+      responses:
+        200:
+          description: The Dapr subscriptions list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DaprSubscriptionArray'
 components:
   schemas:
     Error:
@@ -89,3 +101,23 @@ components:
           items:
             type: string
             format: binary
+    DaprSubscription:
+      type: object
+      required:
+        - pubsubName
+        - topic
+        - route
+      properties:
+        pubsubName:
+          type: string
+          format: binary
+        topic:
+          type: string
+          format: binary
+        route:
+          type: string
+          format: binary
+    DaprSubscriptionArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/DaprSubscription'

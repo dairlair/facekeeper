@@ -6,6 +6,7 @@ from facekeeper import FaceKeeper, FaceNotFoundError
 from http import HTTPStatus
 from waitress import serve
 from config import Config
+from dapr import Dapr
 import connexion
 import threading
 
@@ -56,6 +57,9 @@ def recognize(srv: FaceKeeper):
         'error': 'PERSON_NOT_RECOGNIZED',
     }
 
+
+def dapr_subscribe(dapr: Dapr):
+    return dapr.get_subscriptions()
 
 injector = Injector()
 
