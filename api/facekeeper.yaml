@@ -64,6 +64,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DaprSubscriptionArray'
+  /dapr/recognize:
+    post:
+      operationId: app.dapr_recognize
+      responses:
+        200:
+          description: The Dapr subscriptions list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DaprResponse'
 components:
   schemas:
     Error:
@@ -121,3 +131,10 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/DaprSubscription'
+    DaprResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean

@@ -7,6 +7,8 @@ from http import HTTPStatus
 from waitress import serve
 from config import Config
 from dapr import Dapr
+import requests
+import json
 import connexion
 import threading
 
@@ -58,8 +60,31 @@ def recognize(srv: FaceKeeper):
     }
 
 
+def dapr_recognize(srv: FaceKeeper, dapr: Dapr):
+    payload = json.loads(request.data)
+    result = {}
+    for url in payload['data']['images']:
+        response = requests.get(url)
+        recognition = srv.recognize(response.content)
+        if recognition:
+            result[url] = {
+                'person': recognition.person
+            }
+
+    if result:
+        payload['data']['recognition'] = result
+        ok = dapr.publish_recognized(json.dumps(payload['data']))
+        if ok:
+            print('Recognized message pubslihed successfully', flush=True)
+        else:
+            print('Results not published', flush=True)
+
+    return {'success': True}
+
+
 def dapr_subscribe(dapr: Dapr):
     return dapr.get_subscriptions()
+
 
 injector = Injector()
 
@@ -69,7 +94,8 @@ def initialize(srv: FaceKeeper) -> None:
 
 
 if __name__ == "__main__":
-    app = connexion.FlaskApp(__name__, port=Config.port(), specification_dir='../api/')
+    app = connexion.FlaskApp(
+        __name__, port=Config.port(), specification_dir='../api/')
     app.add_api('facekeeper.yaml', validate_responses=True)
 
     FlaskInjector(app=app.app, modules=[configure], injector=injector)
@@ -80,4 +106,7 @@ if __name__ == "__main__":
     thread = threading.Thread(target=initialize, args=[service])
     thread.start()
 
+    # Use this for local app run
+    # app.run(host=Config.host(), port=Config.port())
+    
     serve(app, host=Config.host(), port=Config.port())
