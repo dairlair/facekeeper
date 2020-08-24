@@ -62,6 +62,13 @@ def recognize(srv: FaceKeeper):
 
 def dapr_recognize(srv: FaceKeeper, dapr: Dapr):
     payload = json.loads(request.data)
+
+    try:
+        urls = payload['data']['images']
+    except TypeError:
+        print('Wrong event received: ' + str(request.data), flush=True)
+        return {'success': True}
+
     result = {}
     for url in payload['data']['images']:
         response = requests.get(url)
@@ -73,6 +80,7 @@ def dapr_recognize(srv: FaceKeeper, dapr: Dapr):
 
     if result:
         payload['data']['recognition'] = result
+        print('Payload:' + json.dumps(payload['data']))
         ok = dapr.publish_recognized(json.dumps(payload['data']))
         if ok:
             print('Recognized message pubslihed successfully', flush=True)
@@ -108,5 +116,5 @@ if __name__ == "__main__":
 
     # Use this for local app run
     # app.run(host=Config.host(), port=Config.port())
-    
+
     serve(app, host=Config.host(), port=Config.port())
