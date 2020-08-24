@@ -68,6 +68,9 @@ def dapr_recognize(srv: FaceKeeper, dapr: Dapr):
     except TypeError:
         print('Wrong event received: ' + str(request.data), flush=True)
         return {'success': True}
+    except KeyError:
+        print('Wrong event received: ' + str(request.data), flush=True)
+        return {'success': True}
 
     result = {}
     for url in payload['data']['images']:
