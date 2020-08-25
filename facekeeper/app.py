@@ -59,7 +59,45 @@ def recognize(srv: FaceKeeper):
         'error': 'PERSON_NOT_RECOGNIZED',
     }
 
+def dapr_memorize(srv: FaceKeeper, dapr: Dapr):
+    data = dapr.get_data(request)
+    print('Received: ' + str(data), flush=True)
+    result = {}
+    try:
+        person = data['person']
+        image = data['image']
+        response = requests.get(image)
+        try:
+            memorization = srv.memorize(person, response.content)
+            if memorization:
+                result['digest'] = memorization.digest
+
+        except FaceNotFoundError:
+            print('Face not found on ' + image, flush=True)
+            pass
+
+    except TypeError:
+        print('Wrong event received: ' + str(type(data)) + ': ' + str(data), flush=True)
+        return {'success': True}
+    except KeyError:
+        print('Wrong event received: ' + str(type(data)) + ': ' + str(data), flush=True)
+        return {'success': True}
+
+    if result:
+        data['memorizing'] = result
+        print('Payload:' + json.dumps(data))
+        ok = dapr.publish_memorized(json.dumps(data))
+        if ok:
+            print('Memorized message pubslihed successfully', flush=True)
+        else:
+            print('Results not published', flush=True)
+    else:
+        print('No persons recognized')
+
+    return {'success': True}
+
 def dapr_recognize(srv: FaceKeeper, dapr: Dapr):
+    print('Received: ' + str(request.data), flush=True)
     payload = json.loads(request.data)
 
     try:

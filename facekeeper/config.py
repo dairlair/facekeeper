@@ -23,12 +23,3 @@ class Config(object):
     @staticmethod
     def mongodb_database() -> str:
         return os.environ.get("MONGODB_DATABASE") or 'facekeeper'
-
-    # Dapr settings
-    @staticmethod
-    def dapr_url() -> str:
-        return os.environ.get("DAPR_URL") or None
-
-    @staticmethod
-    def dapr_pubsub() -> str:
-        return os.environ.get("DAPR_PUBSUB") or 'pubsub'
