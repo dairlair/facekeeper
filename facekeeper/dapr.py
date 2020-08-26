@@ -12,11 +12,11 @@ class Dapr():
             self.pubsub = getenv('DAPR_PUBSUB') or 'pubsub'
 
 
-    def publish(self, topic: str, json: str) -> bool:
+    def publish(self, topic: str, data: dict) -> bool:
         if not self.url:
             return False
 
-        response: Response = post(f'{self.url}/publish/{self.pubsub}/{topic}', json=json)
+        response: Response = post(f'{self.url}/publish/{self.pubsub}/{topic}', json=data)
         if response.ok:
             print('Dapr event pubslihed successfully', flush=True)
         else:
