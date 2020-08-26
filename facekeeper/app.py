@@ -74,7 +74,7 @@ def dapr_memorize(srv: FaceKeeper, dapr: Dapr):
 
     if result:
         data["memorizing"] = result
-        dapr.publish("Memorized", json.dumps(data))
+        dapr.publish("Memorized", data)
 
     return {"success": True}
 
@@ -95,7 +95,7 @@ def dapr_recognize(srv: FaceKeeper, dapr: Dapr):
 
     if result:
         data["recognition"] = result
-        dapr.publish("Recognized", json.dumps(data))
+        dapr.publish("Recognized", data)
     else:
         print("No faces found")
 
