@@ -2,7 +2,7 @@ from flask import request, abort
 from flask_injector import FlaskInjector
 from injector import Injector
 from dependencies import configure
-from facekeeper import FaceKeeper, FaceNotFoundError
+from facekeeper import FaceKeeper
 from http import HTTPStatus
 from waitress import serve
 from config import Config
@@ -29,13 +29,12 @@ def memorize(srv: FaceKeeper):
     response = {}
     for file in request.files.getlist('files'):
         content = file.read()
-        try:
-            result = srv.memorize(person, content)
+        if result := srv.memorize(person, content):
             response[file.filename] = {
                 'length': len(content),
                 'digest': result.digest,
             }
-        except FaceNotFoundError:
+        else:
             response[file.filename] = {
                 'error': 'FACE_NOT_FOUND',
             }
@@ -45,36 +44,25 @@ def memorize(srv: FaceKeeper):
 
 def recognize(srv: FaceKeeper):
     content = request.files['file'].read()
-
-    try:
-        result = srv.recognize(content)
-        if result:
-            return {'person': result.person}
-    except FaceNotFoundError:
-        return {
-            'error': 'FACE_NOT_FOUND',
-        }
+    if result := srv.recognize(content):
+        return {'person': result.person}
 
     return {
-        'error': 'PERSON_NOT_RECOGNIZED',
+        'error': 'FACE_NOT_FOUND',
     }
 
 def dapr_memorize(srv: FaceKeeper, dapr: Dapr):
     data = dapr.get_data(request)
-    print('Received: ' + str(data), flush=True)
-    result = {}
     try:
+        result = {}
         person = data['person']
-        image = data['image']
-        response = requests.get(image)
-        try:
+        urls = data['images']
+        for url in urls:
+            response = requests.get(url)
             memorization = srv.memorize(person, response.content)
-            if memorization:
-                result['digest'] = memorization.digest
 
-        except FaceNotFoundError:
-            print('Face not found on ' + image, flush=True)
-            pass
+            if memorization:
+                result['url'] = {'digest': memorization.digest, 'length': len(response.content)}
 
     except TypeError:
         print('Wrong event received: ' + str(type(data)) + ': ' + str(data), flush=True)
@@ -85,23 +73,14 @@ def dapr_memorize(srv: FaceKeeper, dapr: Dapr):
 
     if result:
         data['memorizing'] = result
-        print('Payload:' + json.dumps(data))
-        ok = dapr.publish_memorized(json.dumps(data))
-        if ok:
-            print('Memorized message pubslihed successfully', flush=True)
-        else:
-            print('Results not published', flush=True)
-    else:
-        print('No persons recognized')
+        dapr.publish('Memorized', json.dumps(data))    
 
     return {'success': True}
 
 def dapr_recognize(srv: FaceKeeper, dapr: Dapr):
-    print('Received: ' + str(request.data), flush=True)
-    payload = json.loads(request.data)
-
+    data = dapr.get_data(request)
     try:
-        urls = payload['data']['images']
+        urls = data['images']
     except TypeError:
         print('Wrong event received: ' + str(request.data), flush=True)
         return {'success': True}
@@ -109,38 +88,29 @@ def dapr_recognize(srv: FaceKeeper, dapr: Dapr):
         print('Wrong event received: ' + str(request.data), flush=True)
         return {'success': True}
 
-    if len(urls) == 0:
-        print('Empty images set received', flush=True)
-        return {'success': True}
-
     result = {}
     for url in urls:
         response = requests.get(url)
-        try:
-            recognition = srv.recognize(response.content)
-            if recognition:
-                result[url] = {
-                    'person': recognition.person
-                }
-        except FaceNotFoundError:
-            pass
+        if recognition := srv.recognize(response.content):
+            result[url] = {
+                'person': recognition.person
+            }
+        
 
     if result:
-        payload['data']['recognition'] = result
-        print('Payload:' + json.dumps(payload['data']))
-        ok = dapr.publish_recognized(json.dumps(payload['data']))
-        if ok:
-            print('Recognized message pubslihed successfully', flush=True)
-        else:
-            print('Results not published', flush=True)
+        data['recognition'] = result
+        dapr.publish('Recognized', json.dumps(data))
     else:
-        print('No persons recognized')
+        print('No faces found')
 
     return {'success': True}
 
 
 def dapr_subscribe(dapr: Dapr):
-    return dapr.get_subscriptions()
+    return [
+        {'pubsubName': dapr.pubsub, 'topic': 'Memorize', 'route': 'dapr/memorize'},
+        {'pubsubName': dapr.pubsub, 'topic': 'Recognize', 'route': 'dapr/recognize'},
+    ]
 
 
 injector = Injector()

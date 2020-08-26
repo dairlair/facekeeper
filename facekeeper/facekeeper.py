@@ -5,20 +5,6 @@ from injector import inject
 from typing import List, Optional
 
 
-class FaceKeeperError(Exception):
-    """
-        Just a general error for FaceKeeper
-    """
-    pass
-
-
-class FaceNotFoundError(FaceKeeperError):
-    """
-        This error must be raised when the recognizer can not recognize face in the given image
-    """
-    pass
-
-
 class PersonEmbedding:
     """
         The person embedding is structure which contains information about person
@@ -73,10 +59,10 @@ class RecognizerInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def calc_embedding(self, image: bytes) -> np.array:
+    def calc_embedding(self, image: bytes) -> Optional[np.array]:
         """
         Must returns face embedding calculated with certain trained model.
-        Must raise FaceNotFoundError when the given image does not contains exactly one face.
+        Must return None when the given image does not contains exactly one face.
         """
         raise NotImplementedError
 
@@ -133,12 +119,12 @@ class FaceKeeper:
     def is_initialized(self):
         return self.initialized
 
-    def memorize(self, person: str, image: bytes) -> MemorizeResponse:
+    def memorize(self, person: str, image: bytes) -> Optional[MemorizeResponse]:
         """
         Takes the person identifier and the picture.
         Calculates the face embeddings for face on the photo and remember this embeddings as related with person.
 
-        Note: if the image contains zero or more than one faces this method will raise error: FaceNotFoundError.
+        Note: if the image contains zero or more than one faces this method will return None.
         """
         digest = get_digest(image)
         recognizer = self.recognizer.get_id()
@@ -156,7 +142,7 @@ class FaceKeeper:
         """
         Tries to find the similar embeddings and returns the person identifier if it is found, None otherwise.
 
-        Note: if the image contains zero or more than one faces this method will raise error: FaceNotFoundError.
+        Note: if the image contains zero or more than one faces this method will return None.
         """
         person = self.recognizer.recognize(image)
 

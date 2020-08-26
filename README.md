@@ -15,12 +15,12 @@ DAPR_PUBSUB=pubsub # The Dapr pubsub name
 Just run
 
 ```
-PORT=3001 dapr run --app-id facekeeper --dapr-http-port 3500 --app-port 3001 python facekeeper/app.py
+MONGODB_HOST=host.docker.internal PORT=3001 dapr run --app-id facekeeper --dapr-http-port 3500 --app-port 3001 python facekeeper/app.py
 ```
 
 Send photos for memorize:
 ```shell script
-dapr publish --pubsub "pubsub" --topic "Memorize" --data '{"image": ["https://cdn1-www.comingsoon.net/assets/uploads/2020/02/3631198-fast-9.jpg", "person": "Vin Diesel"]}'
+dapr publish --pubsub "pubsub" --topic "Memorize" --data '{"images": ["https://cdn1-www.comingsoon.net/assets/uploads/2020/02/3631198-fast-9.jpg"], "person": "Vin Diesel"}'
 ```
 
 Send photos for recognize:
