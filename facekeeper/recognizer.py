@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from facekeeper import RecognizerInterface, PersonEmbedding, FaceNotFoundError
+from facekeeper import RecognizerInterface, PersonEmbedding
 import face_recognition
 from PIL import Image
 import numpy as np
@@ -16,11 +16,11 @@ class Recognizer(RecognizerInterface):
     def get_id(self) -> str:
         return 'github.com/ageitgey/face_recognition:' + self.model
 
-    def calc_embedding(self, image: bytes) -> np.array:
+    def calc_embedding(self, image: bytes) -> Optional[np.array]:
         img = read_file_to_array(image)
         embeddings = face_recognition.face_encodings(img, None, 1, self.model)
         if len(embeddings) != 1:
-            raise FaceNotFoundError()
+            return None
 
         return embeddings[0]
 

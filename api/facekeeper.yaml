@@ -52,6 +52,39 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/Image'
+  /dapr/subscribe:
+    get:
+      summary: Returns the list of topic for Dapr pubsub
+      operationId: app.dapr_subscribe
+      description: Get dapr subscriptions list
+      responses:
+        200:
+          description: The Dapr subscriptions list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DaprSubscriptionArray'
+  /dapr/memorize:
+    post:
+      summary: Adds the photos to FaceKeeper and save as associcated with specified person
+      operationId: app.dapr_memorize
+      responses:
+        200:
+          description: Images processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DaprResponse'
+  /dapr/recognize:
+    post:
+      operationId: app.dapr_recognize
+      responses:
+        200:
+          description: Images processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DaprResponse'
 components:
   schemas:
     Error:
@@ -89,3 +122,30 @@ components:
           items:
             type: string
             format: binary
+    DaprSubscription:
+      type: object
+      required:
+        - pubsubName
+        - topic
+        - route
+      properties:
+        pubsubName:
+          type: string
+          format: binary
+        topic:
+          type: string
+          format: binary
+        route:
+          type: string
+          format: binary
+    DaprSubscriptionArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/DaprSubscription'
+    DaprResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
