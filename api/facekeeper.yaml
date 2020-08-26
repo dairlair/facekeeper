@@ -66,11 +66,11 @@ paths:
                 $ref: '#/components/schemas/DaprSubscriptionArray'
   /dapr/memorize:
     post:
-      summary: Adds the photo to FaceKeeper and save as associcated with specified person
+      summary: Adds the photos to FaceKeeper and save as associcated with specified person
       operationId: app.dapr_memorize
       responses:
         200:
-          description: The Dapr subscriptions list
+          description: Images processed
           content:
             application/json:
               schema:
@@ -80,7 +80,7 @@ paths:
       operationId: app.dapr_recognize
       responses:
         200:
-          description: The Dapr subscriptions list
+          description: Images processed
           content:
             application/json:
               schema:
