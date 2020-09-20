@@ -15,7 +15,8 @@ def callback(ch, method, properties, body):
     print(" [x] %r" % body)
     print("Routing key: " + method.routing_key)
     message = "Routing key: " + method.routing_key + ", photo memorized successfully"
-    channel.basic_publish(exchange='iaexchange', routing_key='center.facekeeper.memorized', body=message)
+    channel.basic_publish(exchange='iaexchange', routing_key='center.memorized', body=message)
+    channel.basic_publish(exchange='iaexchange', routing_key='center.recognized', body=message)
 
 channel.basic_consume(queue=queue, on_message_callback=callback, auto_ack=True)
 
