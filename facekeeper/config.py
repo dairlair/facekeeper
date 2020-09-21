@@ -14,7 +14,7 @@ class Config(object):
     # MongoDB settings
     @staticmethod
     def mongodb_host() -> str:
-        return os.environ.get("MONGODB_HOST") or "localhost"
+        return os.environ.get("MONGODB_HOST") or "host.docker.internal"
 
     @staticmethod
     def mongodb_port() -> int:
@@ -24,3 +24,6 @@ class Config(object):
     def mongodb_database() -> str:
         return os.environ.get("MONGODB_DATABASE") or "facekeeper"
 
+    @staticmethod
+    def amqp_url() -> str:
+        return os.environ.get('AMQP_URL') or 'amqp://guest:guest@localhost:5672/%2F'
