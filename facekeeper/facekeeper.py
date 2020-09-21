@@ -26,7 +26,7 @@ class StorageInterface(ABC):
     """
 
     @abstractmethod
-    def save_embedding(self, person: str, image_digest: str, recognizer: str, embedding: np.array) -> None:
+    def save_embedding(self, person: str, image_digest: str, recognizer: str, embedding: np.array) -> str:
         """
         :param person: The unique person identifier.
         :param image_digest: Image digest calculated with some hash function. Used to avoid duplicates
@@ -90,7 +90,8 @@ def get_digest(data: bytes) -> str:
 
 
 class MemorizeResponse:
-    def __init__(self, digest: str):
+    def __init__(self, id: str, digest: str):
+        self.id = id
         self.digest = digest
 
 
@@ -131,12 +132,12 @@ class FaceKeeper:
         embedding = self.recognizer.calc_embedding(image)
 
         # Save calculated embedding in the storage
-        self.storage.save_embedding(person, digest, recognizer, embedding)
+        id: str = self.storage.save_embedding(person, digest, recognizer, embedding)
 
         # Load calculated embedding into the recognizer embeddings
         self.recognizer.add_embeddings([PersonEmbedding(person, embedding)])
 
-        return MemorizeResponse(digest)
+        return MemorizeResponse(id, digest)
 
     def recognize(self, image: bytes) -> Optional[RecognizeResponse]:
         """
