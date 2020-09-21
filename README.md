@@ -1,3 +1,9 @@
+# FaceKeeper
+
+[![codecov](https://codecov.io/gh/dairlair/facekeeper/branch/master/graph/badge.svg)](https://codecov.io/gh/dairlair/facekeeper)
+
+The application provides ability to memorize and recognize.
+
 ## How to run dev version
 
 ## RabbitMQ
