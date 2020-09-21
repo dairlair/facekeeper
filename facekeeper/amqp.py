@@ -23,7 +23,7 @@ def memorize(channel, method, properties, body):
     payload = decode_payload(body)
     image = download_image(payload['url'])
     response = service.memorize(person=payload['person'], image=image)
-    payload['memorization'] = {'success': True, 'data': response.__dict__ if response else None}
+    payload['memorizing'] = {'success': True, 'data': response.__dict__ if response else None}
     channel.basic_ack(delivery_tag=method.delivery_tag)
     channel.basic_publish(exchange="", routing_key='facekeeper.memorized', body=json.dumps(payload))
 

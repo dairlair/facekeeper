@@ -11,6 +11,11 @@ class Config(object):
     def port() -> int:
         return os.environ.get("PORT") or 80
 
+    # Storage settings
+    @staticmethod
+    def storage_dsn() -> int:
+        return os.environ.get("STORAGE_DSN") or "postgresql://facekeeper:facekeeper@localhost:5432/facekeeper"
+
     # MongoDB settings
     @staticmethod
     def mongodb_host() -> str:
