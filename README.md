@@ -1,37 +1,35 @@
 ## How to run dev version
 
-## Daparizations
-Facekeep is a darp-compatible application. The application is ready to listen to two topics (`Memorize` and `Recognize`) using the Dapr pub-sub functionality and process events from these topics along with pushing results into the Dapr topics.
+## RabbitMQ
 
-The app provides endpoint `dapr/subscribe` which returns the list of events and their REST handler.
+Before the start of FaceKeeper exporing you need to load the SQL dump located at `schema/postgres/init.sql` into your PostgreSQL instance.
 
-When you run the application you can pass following Dapr settings:
-
-```
-DAPR_PUBSUB=pubsub # The Dapr pubsub name
-```
-
-### Run locally as a Darp app
-Just run
-
-```
-MONGODB_HOST=host.docker.internal PORT=3001 dapr run --app-id facekeeper --dapr-http-port 3500 --app-port 3001 python -u facekeeper/app.py
-```
-
-Send photos for memorize:
+When your database is ready you cat run application using this command:
 ```shell script
-dapr publish --pubsub "pubsub" --topic "Memorize" --data '{"images": ["https://cdn1-www.comingsoon.net/assets/uploads/2020/02/3631198-fast-9.jpg"], "person": "Vin Diesel"}'
+STORAGE_DSN="postgresql://facekeeper:facekeeper@172.28.128.1:5432/facekeeper" AMQP_URL="amqp://ia:ia@172.28.128.1:5672/iavhost" python facekeeper/amqp.py
 ```
 
-Send photos for recognize:
-```shell script
-dapr publish --pubsub "pubsub" --topic "Recognize" --data '{"images": ["https://m.media-amazon.com/images/M/MV5BODg3MzYwMjE4N15BMl5BanBnXkFtZTcwMjU5NzAzNw@@._V1_.jpg"]}'
-```
-
-Once the FaceKeeper received this message it will process it and push original data with the added field `recognized` to the recognized topic in format:
+And the publish to the RabbitMQ queue "facekeeper.memorize" this message:
 ```json
-{   
-    "images": ...
-    "recognition": {"<URL>": {"person": "<Person ID>"}}
-}
+{"person": "Angelina Jolie", "url": "https://i.pinimg.com/originals/be/ab/f3/beabf3c712d56235cc65d91ea439aaab.jpg"}
 ```
+
+When it is done FaceKeeper will publish to the queue "facekeeper.memorized" this message:
+```json
+{"person": "Angelina Jolie", "url": "https://i.pinimg.com/originals/be/ab/f3/beabf3c712d56235cc65d91ea439aaab.jpg", "memorizing": {"success": true, "data": {"id": "b295b5b5-8325-4f8b-b33e-6fd582554d52", "digest": "9780859586097eea39ac14c37e644f0b9cfe66f3bb57a9d6149df300b0757323"}}}
+```
+
+When it is done lets try to recognize Angelina Jolie with another photo.
+To do that you need to publish to the RabbitMQ queue "facekeeper.recognize" this message:
+```json
+{"url": "https://data.whicdn.com/images/331364466/original.jpg"}
+```
+
+Finally, in the RabbitMQ queue "facekeeper.recognized" you will get this mesasge:
+```json
+{"url": "https://data.whicdn.com/images/331364466/original.jpg", "recognition": {"success": true, "data": {"person": "Angelina Jolie"}}}
+```
+
+Note: FaceKeeper do not modify any original content in the received messages. 
+It's just add additional field to the json: the `memorizing` field with memorizing results and the `recognition` field with recognition results, obviously.
+Both added fields have a format: `{sucess: boolean, data: dict}`.
