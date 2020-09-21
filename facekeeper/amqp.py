@@ -1,4 +1,4 @@
-# RabbitMQ based application
+# RabbitMQ based application for FaceKeeper
 import pika
 import requests
 import json

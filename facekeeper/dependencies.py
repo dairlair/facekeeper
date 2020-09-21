@@ -1,7 +1,6 @@
 from injector import singleton, Binder
 from facekeeper import FaceKeeper, RecognizerInterface, StorageInterface
 from recognizer import Recognizer
-from dapr import Dapr
 from storage.mongodb import MongoDBStorage
 from storage.postgresql import PostgreSQLStorage
 from config import Config
@@ -14,7 +13,6 @@ def configure(binder: Binder) -> None:
     binder.bind(FaceKeeper, to=FaceKeeper, scope=singleton)
     binder.bind(RecognizerInterface, to=Recognizer('large'), scope=singleton)
     binder.bind(StorageInterface, create_storage, scope=singleton)
-    binder.bind(Dapr,to=Dapr(), scope=singleton)
     binder.bind(BlockingConnection, create_blocking_connection, scope=singleton)
 
 def create_blocking_connection() -> BlockingConnection:
