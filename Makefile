@@ -21,7 +21,7 @@ image:
 
 .PHONY: run
 run: image
-	docker run --rm --name=$(APP) -p "80:80" $(DOCKER_IMAGE):latest
+	docker run --env-file .env --rm --name=$(APP) $(DOCKER_IMAGE):latest
 
 .PHONY: publish
 publish: image

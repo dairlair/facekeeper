@@ -5,8 +5,11 @@ from storage.mongodb import MongoDBStorage
 from storage.postgresql import PostgreSQLStorage
 from config import Config
 from pika import BlockingConnection, URLParameters
+from pika.exceptions import AMQPConnectionError
 from urllib.parse import urlparse, ParseResult
 import psycopg2
+import sys
+import logging
 
 
 def configure(binder: Binder) -> None:
@@ -16,7 +19,12 @@ def configure(binder: Binder) -> None:
     binder.bind(BlockingConnection, create_blocking_connection, scope=singleton)
 
 def create_blocking_connection() -> BlockingConnection:
-    return BlockingConnection(parameters=URLParameters(Config.amqp_url()))
+    try:
+        dsn: str = Config.amqp_url()
+        return BlockingConnection(parameters=URLParameters(dsn))    
+    except AMQPConnectionError as e:
+        logging.error("Couldn't connect to the AMQP broker. Please, check the AMQP is available with the specified URL: [%s]" % dsn)
+        sys.exit(2)
 
 def create_storage() -> StorageInterface:
     dsn: str = Config.storage_dsn()
