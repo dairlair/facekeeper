@@ -4,7 +4,14 @@
 
 The application provides ability to memorize and recognize.
 
-## How to run dev version
+## How to run docker version
+
+```shell script
+# Copy the docker environment file and put your credentials there.
+cp .env.example .env
+# Just a docker run with environment variables from the .env file
+make run
+```
 
 ## RabbitMQ
 
@@ -22,7 +29,7 @@ And the publish to the RabbitMQ queue "facekeeper.memorize" this message:
 
 When it is done FaceKeeper will publish to the queue "facekeeper.memorized" this message:
 ```json
-{"person": "Angelina Jolie", "url": "https://i.pinimg.com/originals/be/ab/f3/beabf3c712d56235cc65d91ea439aaab.jpg", "memorizing": {"success": true, "data": {"id": "b295b5b5-8325-4f8b-b33e-6fd582554d52", "digest": "9780859586097eea39ac14c37e644f0b9cfe66f3bb57a9d6149df300b0757323"}}}
+{"person": "Angelina Jolie", "url": "https://i.pinimg.com/originals/be/ab/f3/beabf3c712d56235cc65d91ea439aaab.jpg", "facekeeper": {"success": true, "data": {"id": "b295b5b5-8325-4f8b-b33e-6fd582554d52", "digest": "9780859586097eea39ac14c37e644f0b9cfe66f3bb57a9d6149df300b0757323"}}}
 ```
 
 When it is done lets try to recognize Angelina Jolie with another photo.
@@ -33,7 +40,7 @@ To do that you need to publish to the RabbitMQ queue "facekeeper.recognize" this
 
 Finally, in the RabbitMQ queue "facekeeper.recognized" you will get this mesasge:
 ```json
-{"url": "https://data.whicdn.com/images/331364466/original.jpg", "recognition": {"success": true, "data": {"person": "Angelina Jolie"}}}
+{"url": "https://data.whicdn.com/images/331364466/original.jpg", "facekeeper": {"success": true, "data": {"person": "Angelina Jolie"}}}
 ```
 
 Note: FaceKeeper do not modify any original content in the received messages. 
