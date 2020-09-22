@@ -54,7 +54,6 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: dairlair/facekeeper
           tag_with_ref: true
-          tag_with_sha: true
 
       - name: Push to GitHub Packages
         uses: docker/build-push-action@v1
@@ -64,4 +63,3 @@ jobs:
           registry: docker.pkg.github.com
           repository: dairlair/facekeeper/facekeeper
           tag_with_ref: true
-          tag_with_sha: true
