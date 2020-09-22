@@ -13,7 +13,7 @@ class GenericConsumer(object):
         self.channel = channel
         self.callback = callback
         self.channel.queue_declare(queue=queue_in, durable=True)
-        self.channel.basic_consume(self.on_message, queue=queue_in)
+        self.channel.basic_consume(queue=queue_in, on_message_callback=self.on_message)
         self.queue_out = queue_out
 
     def on_message(self, ch: pika.adapters.blocking_connection.BlockingChannel, method, properties, body):

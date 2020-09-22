@@ -39,3 +39,7 @@ Finally, in the RabbitMQ queue "facekeeper.recognized" you will get this mesasge
 Note: FaceKeeper do not modify any original content in the received messages. 
 It's just add additional field to the json: the `memorizing` field with memorizing results and the `recognition` field with recognition results, obviously.
 Both added fields have a format: `{sucess: boolean, data: dict}`.
+
+# Exit codes description:
+
+* `2` - The AMQP broker is not available through the specified URL
