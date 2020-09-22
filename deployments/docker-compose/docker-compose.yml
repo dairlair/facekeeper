@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  facekeeper:
+    image: "dairlair/facekeeper:latest"
+    environment:
+      - STORAGE_DSN="${STORAGE_DSN}"
+      - AMQP_URL="${AMQP_URL}"
