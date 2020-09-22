@@ -1,6 +1,12 @@
 version: '3'
 
 services:
+  rabbitmq:
+    image: "rabbitmq:3"
+    environment:
+      - RABBITMQ_DEFAULT_VHOST=iavhost
+      - RABBITMQ_DEFAULT_USER=ia
+      - RABBITMQ_DEFAULT_PASSWORD=ia
   facekeeper:
     image: "dairlair/facekeeper:latest"
     environment:
