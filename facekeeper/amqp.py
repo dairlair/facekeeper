@@ -20,7 +20,10 @@ class GenericConsumer(object):
         try:
             payload = json.loads(body)
             response = self.callback(injector.get(FaceKeeper), payload)
-            payload['facekeeper'] = {'success': True, 'data': response.__dict__ if response else None}
+            if not response:
+                payload['success'] = False
+            else:    
+                payload = {**payload, **response.__dict__}
             self.channel.basic_publish(exchange="", routing_key=self.queue_out, body=json.dumps(payload))
             ch.basic_ack(delivery_tag=method.delivery_tag)
         except Exception as e:
