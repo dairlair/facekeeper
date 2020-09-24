@@ -29,7 +29,7 @@ And the publish to the RabbitMQ queue "facekeeper.memorize" this message:
 
 When it is done FaceKeeper will publish to the queue "facekeeper.memorized" this message:
 ```json
-{"person": "Angelina Jolie", "url": "https://i.pinimg.com/originals/be/ab/f3/beabf3c712d56235cc65d91ea439aaab.jpg", "facekeeper": {"success": true, "data": {"id": "b295b5b5-8325-4f8b-b33e-6fd582554d52", "digest": "9780859586097eea39ac14c37e644f0b9cfe66f3bb57a9d6149df300b0757323"}}}
+{"photoId": 16, "person": "surveillance-1", "url": "https://mediagrabber-dev.s3.amazonaws.com/surveillance-1-1600975134709.jpg", "embeddingId": "c0bf216a-61cd-4e2e-9253-902a9827f8a1", "digest": "cd6c8de8710af54d649ca56307ee2472ecfe7ca41748f06471b071e5cbb91640", "recognizer": "github.com/ageitgey/face_recognition:large", "embedding": [-0.06730382144451141], "success": true}
 ```
 
 When it is done lets try to recognize Angelina Jolie with another photo.
