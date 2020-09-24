@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='facekeeper'
+    name="facekeeper", 
+    packages=find_packages()
 )

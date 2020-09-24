@@ -3,33 +3,12 @@ import pika
 import requests
 import json
 import logging
+from pika.adapters.blocking_connection import BlockingChannel
 from injector import Injector
-from facekeeper import FaceKeeper
-from dependencies import configure
-from config import Config
-
-class GenericConsumer(object):
-    def __init__(self, channel, queue_in: str, queue_out: str, callback):
-        self.channel = channel
-        self.callback = callback
-        self.channel.queue_declare(queue=queue_in, durable=True)
-        self.channel.basic_consume(queue=queue_in, on_message_callback=self.on_message)
-        self.queue_out = queue_out
-
-    def on_message(self, ch: pika.adapters.blocking_connection.BlockingChannel, method, properties, body):
-        try:
-            payload = json.loads(body)
-            response = self.callback(injector.get(FaceKeeper), payload)
-            if not response:
-                payload['success'] = False
-            else:    
-                payload = {**payload, **response.__dict__}
-            self.channel.basic_publish(exchange="", routing_key=self.queue_out, body=json.dumps(payload))
-            ch.basic_ack(delivery_tag=method.delivery_tag)
-        except Exception as e:
-            # We can not process this message and should log the error
-            # @TODO Improve the error handling for any cases: wrong messages format, internal issues, etc...
-            logging.error(e)
+from facekeeper.core import FaceKeeper
+from facekeeper.dependencies import configure
+from facekeeper.config import Config
+from facekeeper.consumer import Consumer
 
 def download_image(url: str) -> bytes:
     response = requests.get(url)
@@ -42,8 +21,6 @@ def memorize(service: FaceKeeper, payload: dict) ->  dict:
 def recognize(service: FaceKeeper, payload: dict) ->  dict:
     image = download_image(payload['url'])
     return service.recognize(image=image)
-
-
 
 if __name__ == "__main__":
     # Dependency Injection setup
@@ -58,8 +35,8 @@ if __name__ == "__main__":
     service.initialize()
 
     # Create two consumers for memorize and recognize queues
-    GenericConsumer(channel, 'facekeeper.memorize', 'facekeeper.memorized', memorize)
-    GenericConsumer(channel, 'facekeeper.recognize', 'facekeeper.recognized', recognize)
+    Consumer(service, channel, 'facekeeper.memorize', 'facekeeper.memorized', memorize)
+    Consumer(service, channel, 'facekeeper.recognize', 'facekeeper.recognized', recognize)
 
     try:
         channel.start_consuming()

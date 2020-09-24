@@ -1,4 +1,4 @@
-from facekeeper import StorageInterface, PersonEmbedding
+from facekeeper.core import StorageInterface, PersonEmbedding
 import numpy as np
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
