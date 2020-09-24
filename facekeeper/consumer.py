@@ -14,9 +14,9 @@ class Consumer(object):
     def on_message(self, ch: BlockingChannel, method, properties, body: str):
         payload = json.loads(body)
         response = self.callback(self.service, payload)
-        if not response:
-            payload['success'] = False
+        if response is None:
+            payload = {**payload, 'success': False}
         else:    
-            payload = {**payload, **response.__dict__}
+            payload = {**payload, **response.__dict__, 'success': True}
         self.channel.basic_publish(exchange="", routing_key=self.queue_out, body=json.dumps(payload))
         ch.basic_ack(delivery_tag=method.delivery_tag)
