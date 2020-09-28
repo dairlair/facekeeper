@@ -90,9 +90,11 @@ def get_digest(data: bytes) -> str:
 
 
 class MemorizeResponse:
-    def __init__(self, id: str, digest: str):
-        self.id = id
+    def __init__(self, embedding_id: str, digest: str, recognizer: str, embedding: np.array):
+        self.embeddingId = embedding_id
         self.digest = digest
+        self.recognizer = recognizer
+        self.embedding = embedding.tolist()
 
 
 class RecognizeResponse:
@@ -132,12 +134,12 @@ class FaceKeeper:
         embedding = self.recognizer.calc_embedding(image)
 
         # Save calculated embedding in the storage
-        id: str = self.storage.save_embedding(person, digest, recognizer, embedding)
+        embedding_id: str = self.storage.save_embedding(person, digest, recognizer, embedding)
 
         # Load calculated embedding into the recognizer embeddings
         self.recognizer.add_embeddings([PersonEmbedding(person, embedding)])
 
-        return MemorizeResponse(id, digest)
+        return MemorizeResponse(embedding_id, digest, recognizer, embedding)
 
     def recognize(self, image: bytes) -> Optional[RecognizeResponse]:
         """

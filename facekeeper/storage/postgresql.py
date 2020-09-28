@@ -1,4 +1,4 @@
-from facekeeper import StorageInterface, PersonEmbedding
+from facekeeper.core import StorageInterface, PersonEmbedding
 import numpy as np
 import psycopg2
 from typing import List, Optional

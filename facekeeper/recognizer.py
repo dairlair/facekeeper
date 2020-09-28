@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from facekeeper import RecognizerInterface, PersonEmbedding
+from facekeeper.core import RecognizerInterface, PersonEmbedding
 import face_recognition
 from PIL import Image
 import numpy as np

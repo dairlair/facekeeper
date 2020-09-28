@@ -2,7 +2,7 @@ from mock import Mock, create_autospec
 from typing import List
 import numpy as np
 
-from facekeeper.facekeeper import FaceKeeper, RecognizerInterface, StorageInterface, PersonEmbedding, get_digest, \
+from facekeeper.core import FaceKeeper, RecognizerInterface, StorageInterface, PersonEmbedding, get_digest, \
     RecognizeResponse
 
 
@@ -28,7 +28,7 @@ def test_initialization():
     assert facekeeper.is_initialized()
 
 
-def test_memorize():
+def test_memorize_using_photo_with_person():
     """
     Ensure that when we call memorize method the FaceKeeper will:
       1. calculate embeddings for given image

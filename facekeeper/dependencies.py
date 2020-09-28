@@ -1,9 +1,9 @@
 from injector import singleton, Binder
-from facekeeper import FaceKeeper, RecognizerInterface, StorageInterface
-from recognizer import Recognizer
-from storage.mongodb import MongoDBStorage
-from storage.postgresql import PostgreSQLStorage
-from config import Config
+from facekeeper.core import FaceKeeper, RecognizerInterface, StorageInterface
+from facekeeper.recognizer import Recognizer
+from facekeeper.storage.mongodb import MongoDBStorage
+from facekeeper.storage.postgresql import PostgreSQLStorage
+from facekeeper.config import Config
 from pika import BlockingConnection, URLParameters
 from pika.exceptions import AMQPConnectionError
 from urllib.parse import urlparse, ParseResult
