@@ -31,9 +31,15 @@ class Recognizer(RecognizerInterface):
 
     def recognize(self, image: bytes) -> Optional[str]:
         face_embedding = self.calc_embedding(image)
+
+        # Face not found on the image
+        if face_embedding is None:
+            return None
+
         # See if the face is a match for the known face(s)
         matches = face_recognition.compare_faces(self.known_face_embeddings, face_embedding)
 
+        # Face not foung among loaded into memory faces
         if not (True in matches):
             return None
 
