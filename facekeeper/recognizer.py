@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from facekeeper.core import RecognizerInterface, PersonEmbedding
+from facekeeper.core import RecognizerInterface, PersonEmbedding, RecognizeResponse
 import face_recognition
 from PIL import Image
 import numpy as np
@@ -14,7 +14,7 @@ class Recognizer(RecognizerInterface):
         self.known_face_embeddings = []
 
     def get_id(self) -> str:
-        return 'github.com/ageitgey/face_recognition:' + self.model
+        return "github.com/ageitgey/face_recognition:" + self.model
 
     def calc_embedding(self, image: bytes) -> Optional[np.array]:
         img = read_file_to_array(image)
@@ -31,18 +31,33 @@ class Recognizer(RecognizerInterface):
 
     def recognize(self, image: bytes) -> Optional[str]:
         face_embedding = self.calc_embedding(image)
-        # See if the face is a match for the known face(s)
-        matches = face_recognition.compare_faces(self.known_face_embeddings, face_embedding)
 
+        # Face not found on the image
+        if face_embedding is None:
+            return RecognizeResponse(
+                recognizer=self.get_id(), embedding=None, person=None
+            )
+
+        # See if the face is a match for the known face(s)
+        matches = face_recognition.compare_faces(
+            self.known_face_embeddings, face_embedding
+        )
+
+        # Face not foung among loaded into memory faces
         if not (True in matches):
-            return None
+            return RecognizeResponse(
+                recognizer=self.get_id(), embedding=face_embedding, person=None
+            )
 
         # The match was found in known_face_embeddings, just use the first one.
         first_match_index = matches.index(True)
-        return self.known_persons[first_match_index]
+        person = self.known_persons[first_match_index]
+        return RecognizeResponse(
+            recognizer=self.get_id(), embedding=face_embedding, person=person
+        )
 
 
-def read_file_to_array(image_data: bytes, mode='RGB') -> np.array:
+def read_file_to_array(image_data: bytes, mode="RGB") -> np.array:
     """
         read_file_to_array(data bytes[, mode='RGB']) -> img
         .

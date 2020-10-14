@@ -3,7 +3,6 @@ import pika
 import requests
 import json
 import logging
-from pika.adapters.blocking_connection import BlockingChannel
 from injector import Injector
 from facekeeper.core import FaceKeeper
 from facekeeper.dependencies import configure
