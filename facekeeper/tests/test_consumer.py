@@ -28,7 +28,7 @@ def callback_input_output_helper(callback_input, callback_output: Optional[objec
     consumer.on_message(channel, method, None, json.dumps(callback_input))
 
     # Then
-    channel.basic_publish.assert_called_once_with(exchange='', routing_key=queue_out, body=expected_body)
+    channel.basic_publish.assert_called_once_with(exchange='', routing_key=queue_out, body=expected_body, mandatory=True)
 
 def test_callback_success():
     input = {'url': 'https://example.com/john.jpg'}

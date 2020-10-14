@@ -16,6 +16,22 @@ class PersonEmbedding:
         self.embedding = embedding
 
 
+class MemorizeResponse:
+    def __init__(
+        self, embedding_id: str, digest: str, recognizer: str, embedding: np.array
+    ):
+        self.embeddingId = embedding_id
+        self.digest = digest
+        self.recognizer = recognizer
+        self.embedding = embedding.tolist()
+
+
+class RecognizeResponse:
+    def __init__(self, embedding: np.array, person: str):
+        self.embedding = embedding.tolist()
+        self.person = person
+
+
 class StorageInterface(ABC):
     """
         StorageInterface is used to declare dependency from the storage.
@@ -26,7 +42,9 @@ class StorageInterface(ABC):
     """
 
     @abstractmethod
-    def save_embedding(self, person: str, image_digest: str, recognizer: str, embedding: np.array) -> str:
+    def save_embedding(
+        self, person: str, image_digest: str, recognizer: str, embedding: np.array
+    ) -> str:
         """
         :param person: The unique person identifier.
         :param image_digest: Image digest calculated with some hash function. Used to avoid duplicates
@@ -75,31 +93,19 @@ class RecognizerInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def recognize(self, image: bytes) -> Optional[str]:
+    def recognize(self, image: bytes) -> RecognizeResponse:
         """
         Must calculate face embeddings and try to find similar embedding among the known person embeddings
         to identify the person from the image.
 
-        Returns person identifier if the person is found, otherwise returns None.
+        Returns object, which contains: embedding, if the face is found on the photo 
+        and person if the person is recognized.
         """
         raise NotImplementedError
 
 
 def get_digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
-
-
-class MemorizeResponse:
-    def __init__(self, embedding_id: str, digest: str, recognizer: str, embedding: np.array):
-        self.embeddingId = embedding_id
-        self.digest = digest
-        self.recognizer = recognizer
-        self.embedding = embedding.tolist()
-
-
-class RecognizeResponse:
-    def __init__(self, person: str):
-        self.person = person
 
 
 class FaceKeeper:
@@ -134,19 +140,19 @@ class FaceKeeper:
         embedding = self.recognizer.calc_embedding(image)
 
         # Save calculated embedding in the storage
-        embedding_id: str = self.storage.save_embedding(person, digest, recognizer, embedding)
+        embedding_id: str = self.storage.save_embedding(
+            person, digest, recognizer, embedding
+        )
 
         # Load calculated embedding into the recognizer embeddings
         self.recognizer.add_embeddings([PersonEmbedding(person, embedding)])
 
         return MemorizeResponse(embedding_id, digest, recognizer, embedding)
 
-    def recognize(self, image: bytes) -> Optional[RecognizeResponse]:
+    def recognize(self, image: bytes) -> RecognizeResponse:
         """
         Tries to find the similar embeddings and returns the person identifier if it is found, None otherwise.
 
         Note: if the image contains zero or more than one faces this method will return None.
         """
-        person = self.recognizer.recognize(image)
-
-        return RecognizeResponse(person=person) if person else None
+        return self.recognizer.recognize(image)
