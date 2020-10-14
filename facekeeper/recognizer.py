@@ -35,7 +35,7 @@ class Recognizer(RecognizerInterface):
         # Face not found on the image
         if face_embedding is None:
             return RecognizeResponse(
-                recognizer_id=self.get_id(), embedding=None, person=None
+                recognizer=self.get_id(), embedding=None, person=None
             )
 
         # See if the face is a match for the known face(s)
@@ -46,14 +46,14 @@ class Recognizer(RecognizerInterface):
         # Face not foung among loaded into memory faces
         if not (True in matches):
             return RecognizeResponse(
-                recognizer_id=self.get_id(), embedding=face_embedding, person=None
+                recognizer=self.get_id(), embedding=face_embedding, person=None
             )
 
         # The match was found in known_face_embeddings, just use the first one.
         first_match_index = matches.index(True)
         person = self.known_persons[first_match_index]
         return RecognizeResponse(
-            recognizer_id=self.get_id(), embedding=face_embedding, person=person
+            recognizer=self.get_id(), embedding=face_embedding, person=person
         )
 
 
