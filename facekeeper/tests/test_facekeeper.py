@@ -66,7 +66,7 @@ def test_recognize():
     image: bytes = bytes([0x13, 0x00, 0x00, 0x00, 0x08, 0x00])
     embedding: np.array = np.array([1, 2, 3])
     recognizer = create_autospec(RecognizerInterface)
-    recognizer.recognize = Mock(return_value=RecognizeResponse(embedding, person))
+    recognizer.recognize = Mock(return_value=RecognizeResponse(recognizer.get_id(), embedding, person))
     storage = create_autospec(StorageInterface)
     facekeeper = FaceKeeper(recognizer, storage)
 

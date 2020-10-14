@@ -27,7 +27,8 @@ class MemorizeResponse:
 
 
 class RecognizeResponse:
-    def __init__(self, embedding: np.array, person: str):
+    def __init__(self, recognizer_id: str, embedding: np.array, person: str):
+        self.recognizerId = recognizer_id
         self.embedding = embedding.tolist()
         self.person = person
 
