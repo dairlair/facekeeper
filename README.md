@@ -4,6 +4,13 @@
 
 The application provides ability to memorize and recognize.
 
+## Configuration
+
+Application accepts these environment variables:
+
+* STORAGE_DSN The storage DSN in format: postgresql://user:password@host:port/database
+* AMQP_URL The AMQP URL in format: amqp://user:password@host:port/virtual-host?option=value
+
 ## How to run docker version
 
 ```shell script
