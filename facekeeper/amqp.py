@@ -28,6 +28,8 @@ if __name__ == "__main__":
     # Just get a pika channel
     connection: pika.BlockingConnection = injector.get(pika.BlockingConnection)
     channel = connection.channel()
+    # We process a heavy tasks, don't need to prefetch more than one message
+    channel.basic_qos(prefetch_count=1)
 
     # Service initialization, we can not consume messages until it's done
     service: FaceKeeper = injector.get(FaceKeeper)
