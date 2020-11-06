@@ -15,7 +15,7 @@ def download_image(url: str) -> bytes:
 
 def memorize(service: FaceKeeper, payload: dict) ->  dict:
     image = download_image(payload['url'])
-    return service.memorize(person=payload['person'], image=image)
+    return service.memorize(person=payload['person'], image=image, tags=payload['tags'])
 
 def recognize(service: FaceKeeper, payload: dict) ->  dict:
     image = download_image(payload['url'])

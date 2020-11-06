@@ -18,12 +18,14 @@ class PersonEmbedding:
 
 class MemorizeResponse:
     def __init__(
-        self, embedding_id: str, digest: str, recognizer: str, embedding: np.array
+        self, embedding_id: str, digest: str, recognizer: str, embedding: np.array, person: str, tags: List[str]
     ):
         self.embeddingId = embedding_id
         self.digest = digest
         self.recognizer = recognizer
         self.embedding = embedding.tolist()
+        self.person = person
+        self.tags = tags
 
 
 class RecognizeResponse:
@@ -44,15 +46,15 @@ class StorageInterface(ABC):
 
     @abstractmethod
     def save_embedding(
-        self, person: str, image_digest: str, recognizer: str, embedding: np.array
-    ) -> str:
-        """
+        self, person: str, image_digest: str, recognizer: str, embedding: np.array, tags: List[str]
+    ) -> str: 1
+    """
         :param person: The unique person identifier.
         :param image_digest: Image digest calculated with some hash function. Used to avoid duplicates
         :param recognizer: The unique identifier of neural network and trained model used to embedding calculation
         :param embedding: Face embedding (e.g.: 128-dimensional vector)
         """
-        raise NotImplementedError
+    raise NotImplementedError
 
     @abstractmethod
     def get_embeddings(self, recognizer: str) -> List[PersonEmbedding]:
@@ -129,7 +131,7 @@ class FaceKeeper:
     def is_initialized(self):
         return self.initialized
 
-    def memorize(self, person: str, image: bytes) -> Optional[MemorizeResponse]:
+    def memorize(self, person: str, image: bytes, tags: List[str]) -> Optional[MemorizeResponse]:
         """
         Takes the person identifier and the picture.
         Calculates the face embeddings for face on the photo and remember this embeddings as related with person.
@@ -142,13 +144,13 @@ class FaceKeeper:
 
         # Save calculated embedding in the storage
         embedding_id: str = self.storage.save_embedding(
-            person, digest, recognizer, embedding
+            person, digest, recognizer, embedding, tags
         )
 
         # Load calculated embedding into the recognizer embeddings
         self.recognizer.add_embeddings([PersonEmbedding(person, embedding)])
 
-        return MemorizeResponse(embedding_id, digest, recognizer, embedding)
+        return MemorizeResponse(embedding_id, digest, recognizer, embedding, person, tags)
 
     def recognize(self, image: bytes) -> RecognizeResponse:
         """
