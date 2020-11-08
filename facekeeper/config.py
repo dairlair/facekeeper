@@ -1,4 +1,8 @@
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file in the project root
+load_dotenv()
 
 class Config(object):
     # Storage settings

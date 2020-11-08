@@ -19,7 +19,7 @@ class PostgreSQLStorage(StorageInterface):
     def save_embedding(self, person: str, digest: str, recognizer: str, embedding: np.array, tags: List[str]) -> str:
         try:
             cur = self.get_connection().cursor()
-            sql = "INSERT INTO embeddings (person, digest, recognizer, embedding, tags) VALUES (%s, %s, %s, ARRAY%s, ARRAY%s) RETURNING id"
+            sql = "INSERT INTO embeddings (person, digest, recognizer, embedding, tags) VALUES (%s, %s, %s, ARRAY%s, %s) RETURNING id"
             cur.execute(sql, (person, digest, recognizer, embedding, tags))
             row = cur.fetchone()
             self.get_connection().commit()

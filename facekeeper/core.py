@@ -47,14 +47,14 @@ class StorageInterface(ABC):
     @abstractmethod
     def save_embedding(
         self, person: str, image_digest: str, recognizer: str, embedding: np.array, tags: List[str]
-    ) -> str: 1
-    """
+    ) -> str:
+        """
         :param person: The unique person identifier.
         :param image_digest: Image digest calculated with some hash function. Used to avoid duplicates
         :param recognizer: The unique identifier of neural network and trained model used to embedding calculation
         :param embedding: Face embedding (e.g.: 128-dimensional vector)
         """
-    raise NotImplementedError
+        raise NotImplementedError
 
     @abstractmethod
     def get_embeddings(self, recognizer: str) -> List[PersonEmbedding]:
