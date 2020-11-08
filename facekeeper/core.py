@@ -131,7 +131,7 @@ class FaceKeeper:
     def is_initialized(self):
         return self.initialized
 
-    def memorize(self, person: str, image: bytes, tags: List[str]) -> Optional[MemorizeResponse]:
+    def memorize(self, person: str, image: bytes, tags: List[str] = []) -> Optional[MemorizeResponse]:
         """
         Takes the person identifier and the picture.
         Calculates the face embeddings for face on the photo and remember this embeddings as related with person.
