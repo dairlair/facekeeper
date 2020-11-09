@@ -1,6 +1,10 @@
 from typing import List, Optional
 
-from facekeeper.core import RecognizerInterface, PersonEmbedding, RecognizeResponse
+from facekeeper.core import (
+    RecognizerInterface,
+    PersonEmbedding,
+    EmbeddingResponse,
+)
 import face_recognition
 from PIL import Image
 import numpy as np
@@ -34,7 +38,7 @@ class Recognizer(RecognizerInterface):
 
         # Face not found on the image
         if face_embedding is None:
-            return RecognizeResponse(
+            return EmbeddingResponse(
                 recognizer=self.get_id(), embedding=None, person=None
             )
 
@@ -45,14 +49,14 @@ class Recognizer(RecognizerInterface):
 
         # Face not foung among loaded into memory faces
         if not (True in matches):
-            return RecognizeResponse(
+            return EmbeddingResponse(
                 recognizer=self.get_id(), embedding=face_embedding, person=None
             )
 
         # The match was found in known_face_embeddings, just use the first one.
         first_match_index = matches.index(True)
         person = self.known_persons[first_match_index]
-        return RecognizeResponse(
+        return EmbeddingResponse(
             recognizer=self.get_id(), embedding=face_embedding, person=person
         )
 

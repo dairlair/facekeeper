@@ -16,9 +16,15 @@ class PersonEmbedding:
         self.embedding = embedding
 
 
-class MemorizeResponse:
+class EmbeddingResponse:
     def __init__(
-        self, embedding_id: str, digest: str, recognizer: str, embedding: np.array, person: str, tags: List[str]
+        self,
+        embedding_id: str,
+        digest: str,
+        recognizer: str,
+        embedding: np.array,
+        person: str,
+        tags: List[str],
     ):
         self.embeddingId = embedding_id
         self.digest = digest
@@ -26,13 +32,6 @@ class MemorizeResponse:
         self.embedding = embedding.tolist()
         self.person = person
         self.tags = tags
-
-
-class RecognizeResponse:
-    def __init__(self, recognizer: str, embedding: Optional[np.array], person: Optional[str]):
-        self.recognizer = recognizer
-        self.embedding = embedding.tolist() if embedding is not None else None
-        self.person = person
 
 
 class StorageInterface(ABC):
@@ -46,7 +45,12 @@ class StorageInterface(ABC):
 
     @abstractmethod
     def save_embedding(
-        self, person: str, image_digest: str, recognizer: str, embedding: np.array, tags: List[str]
+        self,
+        person: str,
+        image_digest: str,
+        recognizer: str,
+        embedding: np.array,
+        tags: List[str],
     ) -> str:
         """
         :param person: The unique person identifier.
@@ -96,7 +100,7 @@ class RecognizerInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def recognize(self, image: bytes) -> RecognizeResponse:
+    def recognize(self, image: bytes) -> EmbeddingResponse:
         """
         Must calculate face embeddings and try to find similar embedding among the known person embeddings
         to identify the person from the image.
@@ -115,7 +119,9 @@ class FaceKeeper:
     initialized: bool = False
 
     @inject
-    def __init__(self, recognizer: RecognizerInterface, storage: StorageInterface):
+    def __init__(
+        self, recognizer: RecognizerInterface, storage: StorageInterface
+    ):
         self.recognizer = recognizer
         self.storage = storage
 
@@ -131,7 +137,9 @@ class FaceKeeper:
     def is_initialized(self):
         return self.initialized
 
-    def memorize(self, person: str, image: bytes, tags: List[str] = []) -> Optional[MemorizeResponse]:
+    def memorize(
+        self, person: str, image: bytes, tags: List[str] = []
+    ) -> Optional[EmbeddingResponse]:
         """
         Takes the person identifier and the picture.
         Calculates the face embeddings for face on the photo and remember this embeddings as related with person.
@@ -150,12 +158,16 @@ class FaceKeeper:
         # Load calculated embedding into the recognizer embeddings
         self.recognizer.add_embeddings([PersonEmbedding(person, embedding)])
 
-        return MemorizeResponse(embedding_id, digest, recognizer, embedding, person, tags)
+        return EmbeddingResponse(
+            embedding_id, digest, recognizer, embedding, person, tags
+        )
 
-    def recognize(self, image: bytes) -> RecognizeResponse:
+    def recognize(self, image: bytes) -> EmbeddingResponse:
         """
-        Tries to find the similar embeddings and returns the person identifier if it is found, None otherwise.
+        Tries to find the similar embeddings and returns
+        the most similar embedding if it is found, None otherwise.
 
-        Note: if the image contains zero or more than one faces this method will return None.
+        Note: if the image contains zero or more than one faces this method
+        will return None.
         """
         return self.recognizer.recognize(image)
