@@ -22,7 +22,7 @@ class EmbeddingsMatcher(object):
                 # self.known_face_embeddings.append(embedding.embedding)
 
 
-    def match(self, face_embedding: np.array):
+    def match(self, face_embedding: np.array, tags: List[str]):
         matches = face_recognition.compare_faces(
             self.known_face_embeddings, face_embedding
         )

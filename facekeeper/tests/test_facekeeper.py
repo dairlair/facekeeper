@@ -16,7 +16,7 @@ def test_initialization():
     # Given
     recognizer_id = "Any Recognizer ID"
     embeddings: List[PersonEmbedding] = [
-        PersonEmbedding("Agent Smith", np.array([1, 2, 3]))
+        PersonEmbedding("id-1", "Agent Smith", np.array([1, 2, 3]), [])
     ]
 
     recognizer = create_autospec(RecognizerInterface)
