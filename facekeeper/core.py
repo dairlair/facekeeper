@@ -7,8 +7,8 @@ from typing import List, Optional
 
 class PersonEmbedding(object):
     """
-        The person embedding is structure which contains information
-        about person and the vector representation of his face features
+    The person embedding is structure which contains information
+    about person and the vector representation of his face features
     """
 
     def __init__(
@@ -38,13 +38,23 @@ class EmbeddingResponse(object):
         self.tags = tags
 
 
+class EmbeddingsMatcherInterface(ABC):
+    @abstractmethod
+    def add_embeddings(self, embeddings: List[PersonEmbedding]) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def match(self, embedding: np.array, tags: List[str]) -> Optional[str]:
+        raise NotImplementedError
+
+
 class StorageInterface(ABC):
     """
-        StorageInterface is used to declare dependency from the storage.
+    StorageInterface is used to declare dependency from the storage.
 
-        The storage must provide functionality to:
-            * add face embedding for specified persons
-            * retrieve all embeddings
+    The storage must provide functionality to:
+        * add face embedding for specified persons
+        * retrieve all embeddings
     """
 
     @abstractmethod
@@ -58,9 +68,11 @@ class StorageInterface(ABC):
     ) -> str:
         """
         :param person: The unique person identifier.
-        :param image_digest: Image digest calculated with some hash function. Used to avoid duplicates
-        :param recognizer: The unique identifier of neural network and trained model used to embedding calculation
-        :param embedding: Face embedding (e.g.: 128-dimensional vector)
+        :param image_digest: Image digest calculated with some hash function.
+                             Used to avoid duplicates.
+        :param recognizer:   The unique identifier of neural network and
+                             trained model used to embedding calculation
+        :param embedding:    Face embedding (e.g.: 128-dimensional vector)
         """
         raise NotImplementedError
 
@@ -75,7 +87,7 @@ class StorageInterface(ABC):
 
 class RecognizerInterface(ABC):
     """
-        RecognizerInterface declares dependency from the library which is used to calculate face embeddings (encodings)
+    RecognizerInterface declares dependency from the library which is used to calculate face embeddings (encodings)
     """
 
     @abstractmethod

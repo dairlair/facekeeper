@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from facekeeper.core import PersonEmbedding
 import face_recognition
 import numpy as np
@@ -25,7 +25,7 @@ class EmbeddingsMatcher(object):
                 self.ids[tag].append(embedding.id)
                 self.embeddings[tag].append(embedding.embedding)
 
-    def match(self, embedding: np.array, tags: List[str]):
+    def match(self, embedding: np.array, tags: List[str]) -> Optional[str]:
         if not tags:
             tags = [DEFAULT_TAG]
 
