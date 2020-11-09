@@ -9,6 +9,8 @@ DEFAULT_TAG = "all"
 
 class EmbeddingsMatcher(object):
     def __init__(self):
+        self.ids = {DEFAULT_TAG: []}
+        self.embeddings = {DEFAULT_TAG: []}
         pass
 
     def add_embeddings(self, embeddings: List[PersonEmbedding]) -> None:
@@ -16,15 +18,37 @@ class EmbeddingsMatcher(object):
             embedding.tags.append(DEFAULT_TAG)
 
             for tag in embedding.tags:
-                pass
-                # TODO Implement
-                # self.known_persons.append(embedding.person)
-                # self.known_face_embeddings.append(embedding.embedding)
+                if tag not in self.ids:
+                    self.embeddings[tag] = []
+                    self.ids[tag] = []
 
+                self.ids[tag].append(embedding.id)
+                self.embeddings[tag].append(embedding.embedding)
 
-    def match(self, face_embedding: np.array, tags: List[str]):
+    def match(self, embedding: np.array, tags: List[str]):
+        if not tags:
+            tags = [DEFAULT_TAG]
+
+        print("Used tags:")
+        print(tags)
+
+        for tag in tags:
+            embedding_id = self.match_in_tag(embedding, tag)
+            if embedding_id is not None:
+                return embedding_id
+
+        return None
+
+    def match_in_tag(self, embedding: np.array, tag: str) -> str:
         matches = face_recognition.compare_faces(
-            self.known_face_embeddings, face_embedding
+            self.embeddings[tag], embedding, tolerance=0.5
         )
 
-        return matches
+        # Face not found among loaded into memory embeddings
+        if not (True in matches):
+            return None
+
+        # The match was found in known_face_embeddings, just use the first one.
+        first_match_index = matches.index(True)
+
+        return self.ids[tag][first_match_index]
