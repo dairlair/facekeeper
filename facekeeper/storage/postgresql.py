@@ -16,7 +16,14 @@ class PostgreSQLStorage(StorageInterface):
         self.dsn = dsn
         self.conn = None
 
-    def save_embedding(self, person: str, digest: str, recognizer: str, embedding: np.array, tags: List[str]) -> str:
+    def save_embedding(
+        self,
+        person: str,
+        digest: str,
+        recognizer: str,
+        embedding: np.array,
+        tags: List[str],
+    ) -> str:
         try:
             cur = self.get_connection().cursor()
             sql = "INSERT INTO embeddings (person, digest, recognizer, embedding, tags) VALUES (%s, %s, %s, ARRAY%s, %s) RETURNING id"
@@ -33,14 +40,25 @@ class PostgreSQLStorage(StorageInterface):
 
     def get_embeddings(self, recognizer) -> List[PersonEmbedding]:
         cur = self.get_connection().cursor()
-        cur.execute(
-            "SELECT person, embedding FROM embeddings WHERE recognizer = %s", (recognizer, ))
-        return [PersonEmbedding(r[0], np.array(r[1])) for r in cur.fetchall()]
+        sql = """
+            SELECT id, person, embedding, tags
+            FROM embeddings
+            WHERE recognizer = %s
+            """
+            
+        cur.execute(sql, (recognizer, ))
+
+        return [
+            PersonEmbedding(r[0], r[1], np.array(r[2]), r[3])
+            for r in cur.fetchall()
+        ]
 
     def get_embedding_id(self, recognizer, digest) -> Optional[str]:
         cur = self.get_connection().cursor()
         cur.execute(
-            "SELECT id FROM embeddings WHERE recognizer = %s AND digest = %s", (recognizer, digest))
+            "SELECT id FROM embeddings WHERE recognizer = %s AND digest = %s",
+            (recognizer, digest),
+        )
         row = cur.fetchone()
         return str(row[0]) if row else None
 

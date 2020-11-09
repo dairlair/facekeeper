@@ -5,6 +5,7 @@ from facekeeper.core import (
     PersonEmbedding,
     EmbeddingResponse,
 )
+from facekeeper.matcher import EmbeddingsMatcher
 import face_recognition
 from PIL import Image
 import numpy as np
@@ -14,8 +15,7 @@ import io
 class Recognizer(RecognizerInterface):
     def __init__(self, model: str):
         self.model = model
-        self.known_persons = []
-        self.known_face_embeddings = []
+        self.matcher = EmbeddingsMatcher()
 
     def get_id(self) -> str:
         return "github.com/ageitgey/face_recognition:" + self.model
@@ -29,17 +29,20 @@ class Recognizer(RecognizerInterface):
         return embeddings[0]
 
     def add_embeddings(self, embeddings: List[PersonEmbedding]) -> None:
-        for embedding in embeddings:
-            self.known_persons.append(embedding.person)
-            self.known_face_embeddings.append(embedding.embedding)
+        self.matcher.add_embeddings(embeddings)
 
-    def recognize(self, image: bytes) -> Optional[str]:
+    def recognize(self, image: bytes, tags: List[str] = []) -> Optional[str]:
         face_embedding = self.calc_embedding(image)
 
         # Face not found on the image
         if face_embedding is None:
             return EmbeddingResponse(
-                recognizer=self.get_id(), embedding=None, person=None
+                embedding_id=None,
+                digest=None,
+                recognizer=self.get_id(),
+                embedding=None,
+                person=None,
+                tags=None
             )
 
         # See if the face is a match for the known face(s)
@@ -65,7 +68,8 @@ def read_file_to_array(image_data: bytes, mode="RGB") -> np.array:
     """
         read_file_to_array(data bytes[, mode='RGB']) -> img
         .
-        .   The function load stream data to PIL.Image and returns converted image as np.array
+        .   The function load stream data to PIL.Image and returns converted
+        .   image as np.array
         .
         .   @param image_data bytes
         .   @param mode string.

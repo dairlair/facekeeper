@@ -5,18 +5,22 @@ from injector import inject
 from typing import List, Optional
 
 
-class PersonEmbedding:
+class PersonEmbedding(object):
     """
-        The person embedding is structure which contains information about person
-        and the vector representation of his face features
+        The person embedding is structure which contains information
+        about person and the vector representation of his face features
     """
 
-    def __init__(self, person: str, embedding: np.array) -> None:
+    def __init__(
+        self, id: str, person: str, embedding: np.array, tags: List[str]
+    ) -> None:
+        self.id = id
         self.person = person
         self.embedding = embedding
+        self.tags = tags
 
 
-class EmbeddingResponse:
+class EmbeddingResponse(object):
     def __init__(
         self,
         embedding_id: str,
@@ -87,7 +91,8 @@ class RecognizerInterface(ABC):
     def calc_embedding(self, image: bytes) -> Optional[np.array]:
         """
         Must returns face embedding calculated with certain trained model.
-        Must return None when the given image does not contains exactly one face.
+        Must return None when the given image does not contains exactly
+        one face.
         """
         raise NotImplementedError
 
@@ -100,13 +105,15 @@ class RecognizerInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def recognize(self, image: bytes) -> EmbeddingResponse:
+    def recognize(
+        self, image: bytes, tags: List[str] = []
+    ) -> EmbeddingResponse:
         """
-        Must calculate face embeddings and try to find similar embedding among the known person embeddings
-        to identify the person from the image.
+        Must calculate face embeddings and try to find similar embedding among
+        the known person embeddings to identify the person from the image.
 
-        Returns object, which contains: embedding, if the face is found on the photo 
-        and person if the person is recognized.
+        Returns object, which contains: embedding, if the face is found on
+        the photo and person if the person is recognized.
         """
         raise NotImplementedError
 
@@ -127,8 +134,8 @@ class FaceKeeper:
 
     def initialize(self):
         """
-        Retrieves all known embeddings which suits current recognizer from the storage and load them
-        into the recognizer.
+        Retrieves all known embeddings which suits current recognizer
+        from the storage and load them into the recognizer.
         """
         embeddings = self.storage.get_embeddings(self.recognizer.get_id())
         self.recognizer.add_embeddings(embeddings)
@@ -142,9 +149,11 @@ class FaceKeeper:
     ) -> Optional[EmbeddingResponse]:
         """
         Takes the person identifier and the picture.
-        Calculates the face embeddings for face on the photo and remember this embeddings as related with person.
+        Calculates the face embeddings for face on the photo and remember
+        this embeddings as related with person.
 
-        Note: if the image contains zero or more than one faces this method will return None.
+        Note: if the image contains zero or more than one faces
+        this method will return None.
         """
         digest = get_digest(image)
         recognizer = self.recognizer.get_id()
@@ -156,13 +165,18 @@ class FaceKeeper:
         )
 
         # Load calculated embedding into the recognizer embeddings
-        self.recognizer.add_embeddings([PersonEmbedding(person, embedding)])
+        person_embedding = PersonEmbedding(
+            embedding_id, person, embedding, tags
+        )
+        self.recognizer.add_embeddings([person_embedding])
 
         return EmbeddingResponse(
             embedding_id, digest, recognizer, embedding, person, tags
         )
 
-    def recognize(self, image: bytes) -> EmbeddingResponse:
+    def recognize(
+        self, image: bytes, tags: List[str] = []
+    ) -> EmbeddingResponse:
         """
         Tries to find the similar embeddings and returns
         the most similar embedding if it is found, None otherwise.
@@ -170,4 +184,4 @@ class FaceKeeper:
         Note: if the image contains zero or more than one faces this method
         will return None.
         """
-        return self.recognizer.recognize(image)
+        return self.recognizer.recognize(image, tags)

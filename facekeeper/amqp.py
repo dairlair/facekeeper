@@ -21,7 +21,7 @@ def memorize(service: FaceKeeper, payload: dict) -> dict:
 
 def recognize(service: FaceKeeper, payload: dict) -> dict:
     image = download_image(payload["url"])
-    return service.recognize(image=image)
+    return service.recognize(image=image, tags=payload["tags"])
 
 
 if __name__ == "__main__":
