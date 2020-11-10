@@ -1,7 +1,7 @@
 import json
 import numpy as np
 from typing import Optional
-from facekeeper.core import EmbeddingResponse, FaceKeeper
+from facekeeper.core import FaceKeeper
 from facekeeper.consumer import Consumer
 from unittest.mock import MagicMock, create_autospec, Mock
 from pika.adapters.blocking_connection import BlockingChannel
@@ -42,21 +42,23 @@ def test_callback_success():
     input = {"url": "https://example.com/john.jpg"}
     person = "john"
     tags = []
-    output = EmbeddingResponse(
-        "embedding_id",
-        "digest",
-        "recognizer",
-        np.array([1, 2, 3]),
-        person,
-        tags,
-    )
-    body = json.dumps({**input, **output.__dict__, "success": True})
+    output = {
+        "embedding_id": "embedding_id",
+        "digest": "digest",
+        "recognizer": "recognizer",
+        "embedding": np.array([1, 2, 3]).tolist(),
+        "person": person,
+        "tags": tags,
+        "success": True
+    }
+    body = json.dumps({**input, **output})
     callback_input_output_helper(input, output, body)
 
 
 def test_callback_empty_result():
     """
-    Ensure when person is not found on the picture the app will push proper message to the queue
+    Ensure when person is not found on the picture
+    the app will push proper message to the queue
     """
     # When the person is not found the FaceKeeper Core returns None
     input = {"url": "https://google.com"}

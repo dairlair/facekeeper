@@ -28,7 +28,7 @@ class Consumer(object):
         if response is None:
             payload = {**payload, "success": False}
         else:
-            payload = {**payload, **response.__dict__, "success": True}
+            payload = {**payload, **response, "success": True}
         self.channel.basic_publish(
             exchange="",
             routing_key=self.queue_out,

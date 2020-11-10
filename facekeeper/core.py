@@ -20,24 +20,6 @@ class PersonEmbedding(object):
         self.tags = tags
 
 
-class EmbeddingResponse(object):
-    def __init__(
-        self,
-        embedding_id: str,
-        digest: str,
-        recognizer: str,
-        embedding: np.array,
-        person: str,
-        tags: List[str],
-    ):
-        self.embeddingId = embedding_id
-        self.digest = digest
-        self.recognizer = recognizer
-        self.embedding = embedding.tolist()
-        self.person = person
-        self.tags = tags
-
-
 class DownloaderInterface(ABC):
     @abstractmethod
     def download(self, url: str) -> bytes:
@@ -147,9 +129,7 @@ class FaceKeeper:
     def is_initialized(self):
         return self.initialized
 
-    def memorize(
-        self, person: str, url: str, tags: List[str] = []
-    ) -> Optional[EmbeddingResponse]:
+    def memorize(self, person: str, url: str, tags: List[str] = []) -> dict:
         """
         Takes the person identifier and the picture.
         Calculates the face embeddings for face on the photo and remember

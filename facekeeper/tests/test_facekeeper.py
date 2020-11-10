@@ -10,7 +10,6 @@ from facekeeper.core import (
     StorageInterface,
     PersonEmbedding,
     get_digest,
-    EmbeddingResponse,
 )
 
 
