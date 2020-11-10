@@ -29,9 +29,6 @@ class EmbeddingsMatcher(object):
         if not tags:
             tags = [DEFAULT_TAG]
 
-        print("Used tags:")
-        print(tags)
-
         for tag in tags:
             embedding_id = self.match_in_tag(embedding, tag)
             if embedding_id is not None:

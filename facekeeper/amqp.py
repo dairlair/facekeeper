@@ -1,27 +1,17 @@
 # RabbitMQ based application for FaceKeeper
 import pika
-import requests
 from injector import Injector
 from facekeeper.core import FaceKeeper
 from facekeeper.dependencies import configure
 from facekeeper.consumer import Consumer
 
 
-def download_image(url: str) -> bytes:
-    response = requests.get(url)
-    return response.content
-
-
 def memorize(service: FaceKeeper, payload: dict) -> dict:
-    image = download_image(payload["url"])
-    return service.memorize(
-        person=payload["person"], image=image, tags=payload["tags"]
-    )
+    return service.memorize(payload["person"], payload["url"], payload["tags"])
 
 
 def recognize(service: FaceKeeper, payload: dict) -> dict:
-    image = download_image(payload["url"])
-    return service.recognize(image=image, tags=payload["tags"])
+    return service.recognize(payload["url"], payload["tags"])
 
 
 if __name__ == "__main__":

@@ -38,6 +38,12 @@ class EmbeddingResponse(object):
         self.tags = tags
 
 
+class DownloaderInterface(ABC):
+    @abstractmethod
+    def download(self, url: str) -> bytes:
+        raise NotImplementedError
+
+
 class EmbeddingsMatcherInterface(ABC):
     @abstractmethod
     def add_embeddings(self, embeddings: List[PersonEmbedding]) -> None:
@@ -119,10 +125,12 @@ class FaceKeeper:
     @inject
     def __init__(
         self,
+        downloader: DownloaderInterface,
         recognizer: RecognizerInterface,
         storage: StorageInterface,
         matcher: EmbeddingsMatcherInterface,
     ):
+        self.downloader = downloader
         self.recognizer = recognizer
         self.storage = storage
         self.matcher = matcher
@@ -133,14 +141,14 @@ class FaceKeeper:
         from the storage and load them into the recognizer.
         """
         embeddings = self.storage.get_embeddings(self.recognizer.get_id())
-        self.recognizer.add_embeddings(embeddings)
+        self.matcher.add_embeddings(embeddings)
         self.initialized = True
 
     def is_initialized(self):
         return self.initialized
 
     def memorize(
-        self, person: str, image: bytes, tags: List[str] = []
+        self, person: str, url: str, tags: List[str] = []
     ) -> Optional[EmbeddingResponse]:
         """
         Takes the person identifier and the picture.
@@ -150,6 +158,8 @@ class FaceKeeper:
         Note: if the image contains zero or more than one faces
         this method will return None.
         """
+        tags = list(tags)
+        image = self.downloader.download(url)
         digest = get_digest(image)
         recognizer = self.recognizer.get_id()
         embedding = self.recognizer.calc_embedding(image)
@@ -163,32 +173,32 @@ class FaceKeeper:
         person_embedding = PersonEmbedding(
             embedding_id, person, embedding, tags
         )
-        self.recognizer.add_embeddings([person_embedding])
+        self.matcher.add_embeddings([person_embedding])
 
-        return EmbeddingResponse(
-            embedding_id, digest, recognizer, embedding, person, tags
-        )
+        return {"success": True, "embedding_id": embedding_id}
 
-    def recognize(
-        self, image: bytes, tags: List[str] = []
-    ) -> EmbeddingResponse:
+    def recognize(self, url: str, tags: List[str] = []) -> dict:
         """
         Tries to find the similar embeddings and returns
         the most similar embedding if it is found.
 
         """
+        tags = list(tags)
+        image = self.downloader.download(url)
         embedding = self.recognizer.calc_embedding(image)
         # Face not found on the image
         if embedding is None:
             return {
-                'success': 'false',
-                ''
+                "success": False,
+                "resolution": "FACE_NOT_RECOGNIZED",
             }
 
         embedding_id = self.matcher.match(embedding, tags)
         # We have no similar embeddings in the matcher database
         if embedding_id is None:
+            return {
+                "success": False,
+                "resolution": "SIMILAR_FACE_NOT_FOUND",
+            }
 
-            
-
-        return self.recognizer.recognize(image, tags)
+        return {"success": True, "embedding_id": embedding_id}
