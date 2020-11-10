@@ -108,27 +108,6 @@ class RecognizerInterface(ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
-    def add_embeddings(self, embeddings: List[PersonEmbedding]) -> None:
-        """
-        Must adds embeddings to the internal storage of recognizer.
-        They will be used for face recognition.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def recognize(
-        self, image: bytes, tags: List[str] = []
-    ) -> EmbeddingResponse:
-        """
-        Must calculate face embeddings and try to find similar embedding among
-        the known person embeddings to identify the person from the image.
-
-        Returns object, which contains: embedding, if the face is found on
-        the photo and person if the person is recognized.
-        """
-        raise NotImplementedError
-
 
 def get_digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -139,10 +118,14 @@ class FaceKeeper:
 
     @inject
     def __init__(
-        self, recognizer: RecognizerInterface, storage: StorageInterface
+        self,
+        recognizer: RecognizerInterface,
+        storage: StorageInterface,
+        matcher: EmbeddingsMatcherInterface,
     ):
         self.recognizer = recognizer
         self.storage = storage
+        self.matcher = matcher
 
     def initialize(self):
         """
@@ -191,9 +174,21 @@ class FaceKeeper:
     ) -> EmbeddingResponse:
         """
         Tries to find the similar embeddings and returns
-        the most similar embedding if it is found, None otherwise.
+        the most similar embedding if it is found.
 
-        Note: if the image contains zero or more than one faces this method
-        will return None.
         """
+        embedding = self.recognizer.calc_embedding(image)
+        # Face not found on the image
+        if embedding is None:
+            return {
+                'success': 'false',
+                ''
+            }
+
+        embedding_id = self.matcher.match(embedding, tags)
+        # We have no similar embeddings in the matcher database
+        if embedding_id is None:
+
+            
+
         return self.recognizer.recognize(image, tags)
