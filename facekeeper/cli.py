@@ -1,6 +1,10 @@
 # CLI Application for memorize and recognize functions
-# Usage example: python facekeeper/cli.py memorize "https://img1.nickiswift.com/img/gallery/what-margot-robbie-was-like-before-the-fame/intro-1596486930.jpg" "Margot Robbie" "hollywood,woman"
-# Or python facekeeper/cli.py recognize "https://img1.nickiswift.com/img/gallery/what-margot-robbie-was-like-before-the-fame/intro-1596486930.jpg" "Margot Robbie" "hollywood,woman"
+# To memorize
+# python facekeeper/cli.py memorize "https://img1.nickiswift.com/img/gallery/what-margot-robbie-was-like-before-the-fame/intro-1596486930.jpg" "Margot Robbie" "hollywood,woman"
+# To recognize
+# python facekeeper/cli.py recognize "https://img1.nickiswift.com/img/gallery/what-margot-robbie-was-like-before-the-fame/intro-1596486930.jpg" "Margot Robbie" "hollywood,woman"
+# To locate faces on the photo just run:
+# python facekeeper/cli.py locate "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846"
 import fire
 from injector import Injector
 from facekeeper.dependencies import configure

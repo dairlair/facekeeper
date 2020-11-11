@@ -11,9 +11,7 @@ class PersonEmbedding(object):
     about person and the vector representation of his face features
     """
 
-    def __init__(
-        self, id: str, person: str, embedding: np.array, tags: List[str]
-    ) -> None:
+    def __init__(self, id: str, person: str, embedding: np.array, tags: List[str]) -> None:
         self.id = id
         self.person = person
         self.embedding = embedding
@@ -47,12 +45,7 @@ class StorageInterface(ABC):
 
     @abstractmethod
     def save_embedding(
-        self,
-        person: str,
-        image_digest: str,
-        recognizer: str,
-        embedding: np.array,
-        tags: List[str],
+        self, person: str, image_digest: str, recognizer: str, embedding: np.array, tags: List[str],
     ) -> str:
         """
         :param person: The unique person identifier.
@@ -91,8 +84,17 @@ class RecognizerInterface(ABC):
     def calc_embedding(self, image: bytes) -> Optional[np.array]:
         """
         Must returns face embedding calculated with certain trained model.
-        Must return None when the given image does not contains exactly
-        one face.
+        Must return None when the given image does not contains exactly one face.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def locate_faces(self, image: bytes) -> List[tuple]:
+        """
+        Returns an array of bounding boxes of human faces in a image
+
+        :param img: Image content, just a bytes
+        :return: A list of tuples of found face locations in css (top, right, bottom, left) order
         """
         raise NotImplementedError
 
@@ -145,22 +147,17 @@ class FaceKeeper:
         embedding = self.recognizer.calc_embedding(image)
 
         # Save calculated embedding in the storage
-        embedding_id: str = self.storage.save_embedding(
-            person, digest, recognizer, embedding, tags
-        )
+        embedding_id: str = self.storage.save_embedding(person, digest, recognizer, embedding, tags)
 
         # Load calculated embedding into the recognizer embeddings
-        person_embedding = PersonEmbedding(
-            embedding_id, person, embedding, tags
-        )
+        person_embedding = PersonEmbedding(embedding_id, person, embedding, tags)
         self.matcher.add_embeddings([person_embedding])
 
         return {"success": True, "embedding_id": embedding_id}
 
     def recognize(self, url: str, tags: List[str] = []) -> dict:
         """
-        Tries to find the similar embeddings and returns
-        the most similar embedding if it is found.
+        Tries to find the similar embeddings and returns the most similar embedding if it is found.
 
         """
         tags = list(tags)
@@ -168,17 +165,19 @@ class FaceKeeper:
         embedding = self.recognizer.calc_embedding(image)
         # Face not found on the image
         if embedding is None:
-            return {
-                "success": False,
-                "resolution": "FACE_NOT_RECOGNIZED",
-            }
+            return {"success": False, "resolution": "FACE_NOT_RECOGNIZED"}
 
         embedding_id = self.matcher.match(embedding, tags)
         # We have no similar embeddings in the matcher database
         if embedding_id is None:
-            return {
-                "success": False,
-                "resolution": "SIMILAR_FACE_NOT_FOUND",
-            }
+            return {"success": False, "resolution": "SIMILAR_FACE_NOT_FOUND"}
 
         return {"success": True, "embedding_id": embedding_id}
+
+    def locate(self, url: str) -> dict:
+        image: bytes = self.downloader.download(url)
+        faces = self.recognizer.locate_faces(image)
+        if not faces:
+            return {"success": False, "resolution": "FACES_NOT_LOCATED"}
+
+        return {"success": True, "faces": faces}

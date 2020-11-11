@@ -37,9 +37,7 @@ class EmbeddingsMatcher(object):
         return None
 
     def match_in_tag(self, embedding: np.array, tag: str) -> str:
-        matches = face_recognition.compare_faces(
-            self.embeddings[tag], embedding, tolerance=0.5
-        )
+        matches = face_recognition.compare_faces(self.embeddings[tag], embedding, tolerance=0.5)
 
         # Face not found among loaded into memory embeddings
         if not (True in matches):

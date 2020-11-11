@@ -30,18 +30,10 @@ if __name__ == "__main__":
 
     # Create two consumers for memorize and recognize queues
     Consumer(
-        service,
-        channel,
-        "facekeeper.memorize",
-        "facekeeper.memorized",
-        memorize,
+        service, channel, "facekeeper.memorize", "facekeeper.memorized", memorize,
     )
     Consumer(
-        service,
-        channel,
-        "facekeeper.recognize",
-        "facekeeper.recognized",
-        recognize,
+        service, channel, "facekeeper.recognize", "facekeeper.recognized", recognize,
     )
 
     try:

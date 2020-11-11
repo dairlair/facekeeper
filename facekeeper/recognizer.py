@@ -1,10 +1,11 @@
-from typing import Optional
+from typing import Optional, List
 from facekeeper.core import RecognizerInterface
 from facekeeper.matcher import EmbeddingsMatcher
 import face_recognition
 from PIL import Image
 import numpy as np
 import io
+import base64
 
 
 class Recognizer(RecognizerInterface):
@@ -22,6 +23,20 @@ class Recognizer(RecognizerInterface):
             return None
 
         return embeddings[0]
+
+    def locate_faces(self, image: bytes) -> List[tuple]:
+        img = read_file_to_array(image)
+        locations = face_recognition.face_locations(img, 1, "fog")
+        result = []
+        for i, location in enumerate(locations):
+            top, right, bottom, left = location
+            face = img[top:bottom, left:right]
+            buffer = io.BytesIO()
+            pil_image = Image.fromarray(face)
+            pil_image.save(buffer, "JPEG")
+            buffer = base64.b64encode(buffer.getvalue())
+            result.append((top, right, bottom, left, buffer))
+        return result
 
 
 def read_file_to_array(image_data: bytes, mode="RGB") -> np.array:
