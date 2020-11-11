@@ -26,7 +26,7 @@ class DownloaderInterface(ABC):
         raise NotImplementedError
 
 
-class EmbeddingsMatcherInterface(ABC):
+class MatcherInterface(ABC):
     @abstractmethod
     def add_embeddings(self, embeddings: List[PersonEmbedding]) -> None:
         raise NotImplementedError
@@ -110,7 +110,7 @@ class FaceKeeper:
         downloader: DownloaderInterface,
         recognizer: RecognizerInterface,
         storage: StorageInterface,
-        matcher: EmbeddingsMatcherInterface,
+        matcher: MatcherInterface,
     ):
         self.downloader = downloader
         self.recognizer = recognizer

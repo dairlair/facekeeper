@@ -4,7 +4,7 @@ from facekeeper.core import (
     RecognizerInterface,
     StorageInterface,
     DownloaderInterface,
-    EmbeddingsMatcherInterface,
+    MatcherInterface,
 )
 from facekeeper.recognizer import Recognizer
 from facekeeper.storage.postgresql import PostgreSQLStorage
@@ -21,7 +21,7 @@ import logging
 def configure(binder: Binder) -> None:
     binder.bind(FaceKeeper, to=FaceKeeper, scope=singleton)
     binder.bind(DownloaderInterface, to=downloader, scope=singleton)
-    binder.bind(EmbeddingsMatcherInterface, to=matcher, scope=singleton)
+    binder.bind(MatcherInterface, to=matcher, scope=singleton)
     binder.bind(RecognizerInterface, to=Recognizer("large"), scope=singleton)
     binder.bind(StorageInterface, storage, scope=singleton)
     binder.bind(BlockingConnection, amqp, scope=singleton)
@@ -52,7 +52,7 @@ def storage() -> StorageInterface:
     )
 
 
-def matcher() -> EmbeddingsMatcherInterface:
+def matcher() -> MatcherInterface:
     return EmbeddingsMatcher()
 
 

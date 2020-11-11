@@ -5,7 +5,7 @@ import numpy as np
 from facekeeper.core import (
     FaceKeeper,
     RecognizerInterface,
-    EmbeddingsMatcherInterface,
+    MatcherInterface,
     DownloaderInterface,
     StorageInterface,
     PersonEmbedding,
@@ -21,7 +21,7 @@ def test_initialization():
     ]
 
     downloader = create_autospec(DownloaderInterface)
-    matcher = create_autospec(EmbeddingsMatcherInterface)
+    matcher = create_autospec(MatcherInterface)
 
     recognizer = create_autospec(RecognizerInterface)
     recognizer.get_id = Mock(return_value=recognizer_id)
@@ -62,7 +62,7 @@ def test_memorize_using_photo_with_person():
     downloader = create_autospec(DownloaderInterface)
     downloader.download = Mock(return_value=image)
     storage = create_autospec(StorageInterface)
-    matcher = create_autospec(EmbeddingsMatcherInterface)
+    matcher = create_autospec(MatcherInterface)
     facekeeper = FaceKeeper(downloader, recognizer, storage, matcher)
 
     # When
