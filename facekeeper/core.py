@@ -60,8 +60,16 @@ class StorageInterface(ABC):
     @abstractmethod
     def get_embeddings(self, recognizer: str) -> List[PersonEmbedding]:
         """
-        This method must retrieves from the storage all embeddings made with specified recognizer
+        This method must retrieve from the storage all embeddings made with specified recognizer
         :param recognizer: The unique identifier of neural network and trained model used to embedding calculation
+        """
+        raise NotImplementedError
+
+    def get_embedding(self, embedding_id: str) -> dict:
+        """
+        Must retrieve all attribtues of embedding from the database.
+
+        :param recognizer: The unique identifier of embedding.
         """
         raise NotImplementedError
 
@@ -154,7 +162,9 @@ class FaceKeeper:
         person_embedding = PersonEmbedding(embedding_id, person, embedding, tags)
         self.matcher.add_embeddings([person_embedding])
 
-        return {"success": True, "embedding_id": embedding_id}
+        attrs = self.storage.get_embedding(embedding_id)
+        # Retrieve all embedding's attributes from the database and add the to result
+        return {"success": True, "embedding_id": embedding_id, "attributes": attrs}
 
     def recognize(self, url: str, tags: List[str] = []) -> dict:
         """

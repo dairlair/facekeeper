@@ -3,6 +3,7 @@ import numpy as np
 import psycopg2
 from typing import List, Optional
 from psycopg2.extensions import register_adapter, AsIs
+from psycopg2.extras import RealDictCursor
 
 
 def addapt_numpy_array(numpy_array):
@@ -23,7 +24,7 @@ class PostgreSQLStorage(StorageInterface):
             cur.execute(sql, (person, digest, recognizer, embedding, tags))
             row = cur.fetchone()
             self.get_connection().commit()
-            return row[0]
+            return row['id']
         except psycopg2.errors.UniqueViolation:
             self.get_connection().rollback()
             # We anyway will return the ID of already saved embedding
@@ -33,15 +34,16 @@ class PostgreSQLStorage(StorageInterface):
 
     def get_embeddings(self, recognizer) -> List[PersonEmbedding]:
         cur = self.get_connection().cursor()
-        sql = """
-            SELECT id, person, embedding, tags
-            FROM embeddings
-            WHERE recognizer = %s
-            """
-
+        sql = "SELECT id, person, embedding, tags FROM embeddings WHERE recognizer = %s"
         cur.execute(sql, (recognizer,))
 
-        return [PersonEmbedding(r[0], r[1], np.array(r[2]), r[3]) for r in cur.fetchall()]
+        return [PersonEmbedding(r['id'], r['person'], np.array(r['embedding']), r['tags']) for r in cur.fetchall()]
+
+    def get_embedding(self, embedding_id: str) -> dict:
+        cur = self.get_connection().cursor()
+        sql = "SELECT * FROM embeddings WHERE id = %s"
+        cur.execute(sql, (embedding_id,))
+        return cur.fetchone()
 
     def get_embedding_id(self, recognizer, digest) -> Optional[str]:
         cur = self.get_connection().cursor()
@@ -49,7 +51,7 @@ class PostgreSQLStorage(StorageInterface):
             "SELECT id FROM embeddings WHERE recognizer = %s AND digest = %s", (recognizer, digest),
         )
         row = cur.fetchone()
-        return str(row[0]) if row else None
+        return str(row['id']) if row else None
 
     def get_connection(self) -> psycopg2.extensions.connection:
         if self.conn is None:
@@ -58,4 +60,4 @@ class PostgreSQLStorage(StorageInterface):
         return self.conn
 
     def connect(self) -> psycopg2.extensions.connection:
-        return psycopg2.connect(self.dsn)
+        return psycopg2.connect(self.dsn, cursor_factory=RealDictCursor)
