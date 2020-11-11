@@ -13,6 +13,9 @@ def memorize(service: FaceKeeper, payload: dict) -> dict:
 def recognize(service: FaceKeeper, payload: dict) -> dict:
     return service.recognize(payload["url"], payload["tags"])
 
+def locate(service: FaceKeeper, payload: dict) -> dict:
+    return service.locate(payload["url"])
+
 
 if __name__ == "__main__":
     # Dependency Injection setup
@@ -34,6 +37,9 @@ if __name__ == "__main__":
     )
     Consumer(
         service, channel, "facekeeper.recognize", "facekeeper.recognized", recognize,
+    )
+    Consumer(
+        service, channel, "facekeeper.locate", "facekeeper.located", locate,
     )
 
     try:
