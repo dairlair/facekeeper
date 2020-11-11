@@ -24,7 +24,7 @@ class Recognizer(RecognizerInterface):
 
         return embeddings[0]
 
-    def locate_faces(self, image: bytes) -> List[tuple]:
+    def locate_faces(self, image: bytes) -> List[dict]:
         img = read_file_to_array(image)
         locations = face_recognition.face_locations(img, 1, "fog")
         result = []
@@ -35,7 +35,7 @@ class Recognizer(RecognizerInterface):
             pil_image = Image.fromarray(face)
             pil_image.save(buffer, "JPEG")
             buffer = base64.b64encode(buffer.getvalue())
-            result.append((top, right, bottom, left, buffer))
+            result.append({"top": top, "right": right, "bottom": bottom, "left": left, "contentBase64": buffer})
         return result
 
 

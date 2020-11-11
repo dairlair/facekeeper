@@ -89,12 +89,13 @@ class RecognizerInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def locate_faces(self, image: bytes) -> List[tuple]:
+    def locate_faces(self, image: bytes) -> List[dict]:
         """
         Returns an array of bounding boxes of human faces in a image
 
         :param img: Image content, just a bytes
-        :return: A list of tuples of found face locations in css (top, right, bottom, left) order
+        :return: A list of dicts of found face locations in the following format:
+                {"top": top, "right": right, "bottom": bottom, "left": left, "contentBase64": data}
         """
         raise NotImplementedError
 
