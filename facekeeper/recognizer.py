@@ -1,17 +1,17 @@
-from typing import List, Optional
-
-from facekeeper.core import RecognizerInterface, PersonEmbedding, RecognizeResponse
+from typing import Optional, List
+from facekeeper.core import RecognizerInterface
+from facekeeper.matcher import EmbeddingsMatcher
 import face_recognition
 from PIL import Image
 import numpy as np
 import io
+import base64
 
 
 class Recognizer(RecognizerInterface):
     def __init__(self, model: str):
         self.model = model
-        self.known_persons = []
-        self.known_face_embeddings = []
+        self.matcher = EmbeddingsMatcher()
 
     def get_id(self) -> str:
         return "github.com/ageitgey/face_recognition:" + self.model
@@ -24,44 +24,27 @@ class Recognizer(RecognizerInterface):
 
         return embeddings[0]
 
-    def add_embeddings(self, embeddings: List[PersonEmbedding]) -> None:
-        for embedding in embeddings:
-            self.known_persons.append(embedding.person)
-            self.known_face_embeddings.append(embedding.embedding)
-
-    def recognize(self, image: bytes) -> Optional[str]:
-        face_embedding = self.calc_embedding(image)
-
-        # Face not found on the image
-        if face_embedding is None:
-            return RecognizeResponse(
-                recognizer=self.get_id(), embedding=None, person=None
-            )
-
-        # See if the face is a match for the known face(s)
-        matches = face_recognition.compare_faces(
-            self.known_face_embeddings, face_embedding
-        )
-
-        # Face not foung among loaded into memory faces
-        if not (True in matches):
-            return RecognizeResponse(
-                recognizer=self.get_id(), embedding=face_embedding, person=None
-            )
-
-        # The match was found in known_face_embeddings, just use the first one.
-        first_match_index = matches.index(True)
-        person = self.known_persons[first_match_index]
-        return RecognizeResponse(
-            recognizer=self.get_id(), embedding=face_embedding, person=person
-        )
+    def locate_faces(self, image: bytes) -> List[dict]:
+        img = read_file_to_array(image)
+        locations = face_recognition.face_locations(img, 1, "fog")
+        result = []
+        for i, location in enumerate(locations):
+            top, right, bottom, left = location
+            face = img[top:bottom, left:right]
+            buffer = io.BytesIO()
+            pil_image = Image.fromarray(face)
+            pil_image.save(buffer, "JPEG")
+            buffer = base64.b64encode(buffer.getvalue())
+            result.append({"top": top, "right": right, "bottom": bottom, "left": left, "contentBase64": buffer})
+        return result
 
 
 def read_file_to_array(image_data: bytes, mode="RGB") -> np.array:
     """
         read_file_to_array(data bytes[, mode='RGB']) -> img
         .
-        .   The function load stream data to PIL.Image and returns converted image as np.array
+        .   The function load stream data to PIL.Image and returns converted
+        .   image as np.array
         .
         .   @param image_data bytes
         .   @param mode string.

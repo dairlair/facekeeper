@@ -11,5 +11,6 @@ CREATE TABLE "embeddings" (
 );
 
 CREATE UNIQUE INDEX "unique_recognizer_digest_ids" ON "embeddings" USING BTREE (recognizer, digest);
+ALTER TABLE "embeddings" ADD COLUMN tags TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];
 
-INSERT INTO embeddings(person, digest, recognizer, embedding) VALUES ('test', 'test', 'test', ARRAY[]::DOUBLE PRECISION[]);
+-- INSERT INTO embeddings(person, digest, recognizer, embedding) VALUES ('test', 'test', 'test', ARRAY[]::DOUBLE PRECISION[]);

@@ -1,25 +1,21 @@
 # RabbitMQ based application for FaceKeeper
 import pika
-import requests
-import json
-import logging
 from injector import Injector
 from facekeeper.core import FaceKeeper
 from facekeeper.dependencies import configure
-from facekeeper.config import Config
 from facekeeper.consumer import Consumer
 
-def download_image(url: str) -> bytes:
-    response = requests.get(url)
-    return response.content
 
-def memorize(service: FaceKeeper, payload: dict) ->  dict:
-    image = download_image(payload['url'])
-    return service.memorize(person=payload['person'], image=image)
+def memorize(service: FaceKeeper, payload: dict) -> dict:
+    return service.memorize(payload["person"], payload["url"], payload["tags"])
 
-def recognize(service: FaceKeeper, payload: dict) ->  dict:
-    image = download_image(payload['url'])
-    return service.recognize(image=image)
+
+def recognize(service: FaceKeeper, payload: dict) -> dict:
+    return service.recognize(payload["url"], payload["tags"])
+
+def locate(service: FaceKeeper, payload: dict) -> dict:
+    return service.locate(payload["url"])
+
 
 if __name__ == "__main__":
     # Dependency Injection setup
@@ -36,8 +32,15 @@ if __name__ == "__main__":
     service.initialize()
 
     # Create two consumers for memorize and recognize queues
-    Consumer(service, channel, 'facekeeper.memorize', 'facekeeper.memorized', memorize)
-    Consumer(service, channel, 'facekeeper.recognize', 'facekeeper.recognized', recognize)
+    Consumer(
+        service, channel, "facekeeper.memorize", "facekeeper.memorized", memorize,
+    )
+    Consumer(
+        service, channel, "facekeeper.recognize", "facekeeper.recognized", recognize,
+    )
+    Consumer(
+        service, channel, "facekeeper.locate", "facekeeper.located", locate,
+    )
 
     try:
         channel.start_consuming()
