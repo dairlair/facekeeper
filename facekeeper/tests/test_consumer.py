@@ -33,9 +33,7 @@ def callback_input_output_helper(
     consumer.on_message(channel, method, None, json.dumps(callback_input))
 
     # Then
-    channel.basic_publish.assert_called_once_with(
-        exchange="", routing_key=queue_out, body=expected_body, mandatory=True
-    )
+    channel.basic_publish.assert_called_once_with("", queue_out, body=expected_body, mandatory=True)
 
 
 def test_callback_success():
@@ -62,6 +60,6 @@ def test_callback_empty_result():
     """
     # When the person is not found the FaceKeeper Core returns None
     input = {"url": "https://google.com"}
-    output = None
+    output = {"success": False}
     body = json.dumps({"url": "https://google.com", "success": False})
     callback_input_output_helper(input, output, body)
