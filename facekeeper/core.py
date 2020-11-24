@@ -191,7 +191,5 @@ class FaceKeeper:
     def locate(self, url: str) -> dict:
         image: bytes = self.downloader.download(url)
         faces = self.recognizer.locate_faces(image)
-        if not faces:
-            return {"success": False, "resolution": "FACES_NOT_LOCATED"}
 
         return {"success": True, "faces": faces}
