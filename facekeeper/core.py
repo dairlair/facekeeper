@@ -154,6 +154,9 @@ class FaceKeeper:
         digest = get_digest(image)
         recognizer = self.recognizer.get_id()
         embedding = self.recognizer.calc_embedding(image)
+        # Face not found on the image
+        if embedding is None:
+            return {"success": False, "resolution": "FACE_NOT_RECOGNIZED"}
 
         # Save calculated embedding in the storage
         embedding_id: str = self.storage.save_embedding(person, digest, recognizer, embedding, tags)
@@ -181,7 +184,7 @@ class FaceKeeper:
         embedding_id = self.matcher.match(embedding, tags)
         # We have no similar embeddings in the matcher database
         if embedding_id is None:
-            return {"success": False, "resolution": "SIMILAR_FACE_NOT_FOUND"}
+            return {"success": False, "resolution": "FACE_NOT_FOUND"}
 
         return {"success": True, "embedding_id": embedding_id}
 
