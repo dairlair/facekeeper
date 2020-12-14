@@ -167,7 +167,7 @@ class FaceKeeper:
 
         attrs = self.storage.get_embedding(embedding_id)
         # Retrieve all embedding's attributes from the database and add the to result
-        return {"success": True, "embedding_id": embedding_id, "attributes": attrs}
+        return {"success": True, "embeddingId": embedding_id, "attributes": attrs}
 
     def recognize(self, url: str, tags: List[str] = []) -> dict:
         """
@@ -186,7 +186,7 @@ class FaceKeeper:
         if embedding_id is None:
             return {"success": False, "resolution": "FACE_NOT_FOUND"}
 
-        return {"success": True, "embedding_id": embedding_id}
+        return {"success": True, "embeddingId": embedding_id}
 
     def locate(self, url: str) -> dict:
         image: bytes = self.downloader.download(url)
