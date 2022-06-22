@@ -1,4 +1,4 @@
-numpy==1.19.0
+numpy==1.22.0
 injector==0.18.3
 mock==4.0.2
 pymongo==3.10.1
